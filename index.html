@@ -193,14 +193,17 @@
       <!-- SECTION 2: CUSTOMERS & MULTI-CONTRACT DETAILS -->
       <section id="sec-customers" class="hidden space-y-6">
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-          <div class="flex justify-between items-center mb-4">
+          <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
             <h3 class="text-lg font-bold text-blue-900 flex items-center gap-2">
               <i class="fa-solid fa-users text-blue-600"></i>
               سجل العملاء والعقود المدمجة
             </h3>
-            <button onclick="loadCustomersSectionData()" class="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold text-blue-900">
-              <i class="fa-solid fa-rotate ml-1"></i> تحديث
-            </button>
+            <div class="flex items-center gap-2 w-full md:w-auto">
+              <input type="text" id="custSearchInput" onkeyup="filterCustomersList()" placeholder="بحث باسم العميل أو الهاتف أو القرية..." class="bg-gray-50 border p-2 rounded-xl text-xs w-full md:w-64 outline-none">
+              <button onclick="loadCustomersSectionData()" class="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-xl text-xs font-bold text-blue-900">
+                <i class="fa-solid fa-rotate"></i>
+              </button>
+            </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -220,6 +223,12 @@
       <!-- SECTION 3: SUPPLIERS & PURCHASES -->
       <section id="sec-suppliers" class="hidden space-y-6">
         
+        <!-- Total Supplier Debt Header -->
+        <div class="bg-blue-900 text-white rounded-2xl p-4 shadow-sm flex justify-between items-center">
+          <span class="text-xs font-bold"><i class="fa-solid fa-coins text-yellow-400 ml-1"></i> إجمالي الديون المستحقة لكافة التجار:</span>
+          <span id="supTotalDebtHeader" class="text-lg font-black text-yellow-400">0 ج.م</span>
+        </div>
+
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
           <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
             <i class="fa-solid fa-boxes-packing text-blue-600"></i>
@@ -289,7 +298,7 @@
               </div>
             </form>
 
-            <h5 class="font-bold text-xs text-gray-600 mt-2">كشف المشتريات والدفعات للتاجر المحدد:</h5>
+            <h5 class="font-bold text-xs text-gray-600 mt-2">كشف المشتريات للتاجر المحدد:</h5>
             <div class="overflow-x-auto max-h-60 overflow-y-auto">
               <table class="w-full text-right text-xs">
                 <thead class="bg-gray-100 text-gray-700 font-bold">
@@ -353,6 +362,31 @@
       </section>
 
     </main>
+  </div>
+
+  <!-- PAY INSTALLMENT MODAL -->
+  <div id="payModal" class="fixed inset-0 bg-black/60 hidden justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h4 class="font-bold text-blue-900 text-md" id="payModalTitle">تحصيل قسط جهاز</h4>
+        <button onclick="closePayModal()" class="text-gray-400 hover:text-black font-bold text-lg">&times;</button>
+      </div>
+      <form onsubmit="submitCustomerPay(event)" class="space-y-3">
+        <input type="hidden" id="payModalOrderId">
+        <input type="hidden" id="payModalCustId">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">المبلغ المحصل (ج.م)</label>
+          <input type="number" id="payModalAmount" required class="w-full bg-gray-50 border p-2.5 rounded-xl text-sm font-bold outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">ملاحظات / رقم الإيصال</label>
+          <input type="text" id="payModalNotes" placeholder="سداد قسط شهر..." class="w-full bg-gray-50 border p-2.5 rounded-xl text-xs outline-none">
+        </div>
+        <button type="submit" id="btnSubmitPay" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
+          حفظ وتأكيد التحصيل
+        </button>
+      </form>
+    </div>
   </div>
 
   <!-- LATE CUSTOMERS MODAL -->
@@ -466,7 +500,6 @@
       }
     }
 
-    // OCR function supporting Hindi Arabic numbers
     async function processIDCard(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -481,7 +514,6 @@
           logger: m => { if (m.status === 'recognizing text') ocrText.innerText = `استخراج البيانات (${Math.round(m.progress * 100)}%)`; }
         });
 
-        // Convert Hindi Arabic numerals to Western
         const westernText = text.replace(/[٠١٢٣٤٥٦٧٨٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
         
         const idMatch = westernText.match(/\d{14}/);
@@ -529,11 +561,12 @@
       document.getElementById("resMonthly").value = monthly.toLocaleString() + " ج.م / شهر";
     }
 
+    // Single Batch Save for Speed
     async function saveCustomerAndOrder(e) {
       e.preventDefault();
       const btn = document.getElementById("btnSaveOrder");
       btn.disabled = true;
-      btn.innerText = "جاري الحفظ...";
+      btn.innerText = "جاري الحفظ المباشر...";
 
       const cash = parseFloat(document.getElementById("pCash").value) || 0;
       const down = parseFloat(document.getElementById("pDown").value) || 0;
@@ -550,25 +583,14 @@
       if (cat === "custom") cat = document.getElementById("customCategoryInput").value || "أخرى";
 
       try {
-        const resCust = await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "addCustomer",
-            name: document.getElementById("cName").value,
-            phone: document.getElementById("cPhone").value,
-            village: document.getElementById("cVillage").value,
-            nationalId: document.getElementById("cNationalID").value
-          })
-        });
-        const custData = await resCust.json();
-
         await fetch(API_URL, {
           method: "POST",
           body: JSON.stringify({
-            action: "createInstallmentOrder",
-            customerId: custData.customerId || "CUST-NEW",
-            customerName: document.getElementById("cName").value,
+            action: "saveOrderBatch",
+            name: document.getElementById("cName").value,
             phone: document.getElementById("cPhone").value,
+            village: document.getElementById("cVillage").value,
+            nationalId: document.getElementById("cNationalID").value,
             category: cat,
             productName: document.getElementById("pName").value,
             cashPrice: cash,
@@ -593,7 +615,6 @@
       }
     }
 
-    // Save Purchase without logout or reload
     async function savePurchase(e) {
       e.preventDefault();
       const btn = document.getElementById("btnSavePurchase");
@@ -612,7 +633,7 @@
           })
         });
 
-        alert("تم تسجيل عملية الشراء وتحديث حساب التاجر!");
+        alert("تم تسجيل الشراء وتحديث حساب التاجر!");
         document.getElementById("purchaseForm").reset();
         loadAllData();
       } catch (err) {
@@ -630,15 +651,14 @@
       }
 
       box.innerHTML = list.map(s => `
-        <div onclick="selectSupplier('${s.SupplierID}', '${s.SupplierName}')" class="p-3 bg-gray-50 border rounded-xl hover:bg-blue-50 cursor-pointer transition flex justify-between items-center">
+        <div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center">
           <div>
             <h5 class="font-bold text-xs text-gray-800">${s.SupplierName}</h5>
-            <span class="text-[10px] text-gray-500">${s.Phone || '-'}</span>
+            <span class="text-[10px] text-gray-400 font-extrabold text-red-600">${(s.TotalDebt || 0).toLocaleString()} ج.م</span>
           </div>
-          <div class="text-left">
-            <span class="text-[10px] text-gray-400 block">المديونية</span>
-            <span class="font-extrabold text-xs text-red-600">${(s.TotalDebt || 0).toLocaleString()} ج.م</span>
-          </div>
+          <button onclick="selectSupplier('${s.SupplierID}', '${s.SupplierName}')" class="bg-blue-900 text-white px-2 py-1 rounded text-[10px] font-bold">
+            تصفية / سداد
+          </button>
         </div>
       `).join('');
     }
@@ -695,20 +715,34 @@
       }
     }
 
-    // Load Customers Section & Combined Contracts
-    function loadCustomersSectionData() {
+    // Filter Customers Search
+    function filterCustomersList() {
+      const query = document.getElementById("custSearchInput").value.toLowerCase();
+      const filtered = allCustomers.filter(c => 
+        (c.Name || '').toLowerCase().includes(query) ||
+        (c.Phone || '').includes(query) ||
+        (c.Village || '').toLowerCase().includes(query)
+      );
+      renderCustomersNavList(filtered);
+    }
+
+    function renderCustomersNavList(list) {
       const box = document.getElementById("customersListNav");
-      if (!allCustomers || allCustomers.length === 0) {
-        box.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">لا يوجد عملاء مسجلون</p>`;
+      if (!list || list.length === 0) {
+        box.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">لا يوجد عملاء مطابقون للبحث</p>`;
         return;
       }
 
-      box.innerHTML = allCustomers.map(c => `
+      box.innerHTML = list.map(c => `
         <div onclick="selectCustomerDetail('${c.CustomerID}')" class="p-3 bg-white border rounded-xl hover:bg-blue-50 cursor-pointer transition">
           <h5 class="font-bold text-xs text-gray-800">${c.Name}</h5>
           <span class="text-[10px] text-gray-500 block">${c.Village || '-'} | ${c.Phone}</span>
         </div>
       `).join('');
+    }
+
+    function loadCustomersSectionData() {
+      renderCustomersNavList(allCustomers);
     }
 
     function selectCustomerDetail(id) {
@@ -733,9 +767,14 @@
             <h4 class="font-extrabold text-blue-900 text-md">${cust.Name}</h4>
             <p class="text-xs text-gray-500">${cust.Village} | هاتف: ${cust.Phone} | بطاقة: ${cust.NationalID || 'غير مسجلة'}</p>
           </div>
-          <span class="px-3 py-1 rounded-full text-xs font-bold ${cust.Rating === 'متأخر' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
-            ${cust.Rating || 'منتظم'}
-          </span>
+          <div class="flex items-center gap-2">
+            <button onclick="shareCustomerWhatsApp('${cust.Phone}', '${cust.Name}', ${totalMonthlyCombo})" class="bg-green-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
+              <i class="fa-brands fa-whatsapp"></i> إرسال المدمج
+            </button>
+            <span class="px-3 py-1 rounded-full text-xs font-bold ${cust.Rating === 'متأخر' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
+              ${cust.Rating || 'منتظم'}
+            </span>
+          </div>
         </div>
 
         <!-- Combo Ribbon -->
@@ -750,17 +789,71 @@
           ${orders.map(o => `
             <div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center text-xs">
               <div>
-                <span class="font-bold text-blue-900 block">${o.ProductName} (${o.Category})</span>
-                <span class="text-[10px] text-gray-500">بداية العقد: ${o.StartDate} \vert{} المدة: ${o.MonthsCount} أشهر</span>
+                <span class="font-bold text-blue-900 block">${o.ProductName \vert{}\vert{} 'جهاز غير معرف'} (${o.Category || 'عام'})</span>
+                <span class="text-[10px] text-gray-500">بداية العقد: ${o.StartDate \vert{}\vert{} '-'} \vert{} المدة: ${o.MonthsCount || 0} أشهر</span>
               </div>
-              <div class="text-left">
+              <div class="text-left space-y-1">
                 <span class="font-bold text-green-700 block">${(o.MonthlyAmount || 0).toLocaleString()} ج.م / شهر</span>
-                <span class="text-[10px] text-red-600">المتبقي: ${(o.RemainingAmount || 0).toLocaleString()} ج.م</span>
+                <span class="text-[10px] text-red-600 block">المتبقي: ${(o.RemainingAmount || 0).toLocaleString()} ج.م</span>
+                ${parseFloat(o.RemainingAmount) > 0 ? `
+                  <button onclick="openPayModal('${o.OrderID}', '${cust.CustomerID}', '${o.ProductName}', ${o.MonthlyAmount})" class="bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold">
+                    تحصيل قسط
+                  </button>
+                ` : '<span class="text-green-600 font-bold">مكتمل</span>'}
               </div>
             </div>
           `).join('')}
         </div>
       `;
+    }
+
+    function openPayModal(orderId, custId, prodName, defaultAmt) {
+      document.getElementById("payModalOrderId").value = orderId;
+      document.getElementById("payModalCustId").value = custId;
+      document.getElementById("payModalTitle").innerText = `تحصيل قسط: ${prodName}`;
+      document.getElementById("payModalAmount").value = defaultAmt || 0;
+      document.getElementById("payModal").classList.remove("hidden");
+      document.getElementById("payModal").classList.add("flex");
+    }
+
+    function closePayModal() {
+      document.getElementById("payModal").classList.add("hidden");
+      document.getElementById("payModal").classList.remove("flex");
+    }
+
+    async function submitCustomerPay(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnSubmitPay");
+      btn.disabled = true;
+
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "payCustomerInstallment",
+            orderId: document.getElementById("payModalOrderId").value,
+            customerId: document.getElementById("payModalCustId").value,
+            amountPaid: parseFloat(document.getElementById("payModalAmount").value) || 0,
+            notes: document.getElementById("payModalNotes").value,
+            paidDate: new Date().toISOString().split('T')[0]
+          })
+        });
+
+        alert("تم تحصيل القسط بنجاح وتحديث العقد!");
+        closePayModal();
+        loadAllData();
+      } catch (err) {
+        alert("حدث خطأ أثناء الحفظ.");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function shareCustomerWhatsApp(phone, name, amount) {
+      let p = phone.replace(/[^0-9]/g, '');
+      if (p.startsWith('0')) p = '2' + p;
+      const msg = `أهلاً بك أ/ ${name}، نود تذكيركم بأن إجمالي القسط الشهري المدمج المطلوب منك حالياً لدى غانم ستور هو (${amount.toLocaleString()} ج.م). شاكرين تعاملكم معنا.`;
+      window.open(`https://wa.me/${p}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     function updateFinanceView() {
@@ -779,9 +872,9 @@
 
       let totalSupDebt = allSuppliers.reduce((acc, s) => acc + (parseFloat(s.TotalDebt) || 0), 0);
       document.getElementById("finSuppliersDebt").innerText = totalSupDebt.toLocaleString() + " ج.م";
+      document.getElementById("supTotalDebtHeader").innerText = totalSupDebt.toLocaleString() + " ج.م";
     }
 
-    // Modals
     function openLateModal() {
       document.getElementById("lateModal").classList.remove("hidden");
       document.getElementById("lateModal").classList.add("flex");
@@ -801,7 +894,7 @@
           <td class="p-2 text-blue-900">${o.ProductName}</td>
           <td class="p-2 font-bold text-red-600">${(o.RemainingAmount || 0).toLocaleString()} ج.م</td>
           <td class="p-2 text-center">
-            <button onclick="sendWhatsapp('${o.Phone}', '${o.CustomerName}', '${o.ProductName}', '${o.MonthlyAmount}')" class="bg-green-600 text-white px-2 py-1 rounded text-[10px]">
+            <button onclick="shareCustomerWhatsApp('${o.Phone}', '${o.CustomerName}', ${o.MonthlyAmount})" class="bg-green-600 text-white px-2 py-1 rounded text-[10px]">
               <i class="fa-brands fa-whatsapp"></i> واتساب
             </button>
           </td>
@@ -838,13 +931,6 @@
     function closeDebtModal() {
       document.getElementById("debtModal").classList.add("hidden");
       document.getElementById("debtModal").classList.remove("flex");
-    }
-
-    function sendWhatsapp(phone, name, product, amount) {
-      let p = phone.replace(/[^0-9]/g, '');
-      if (p.startsWith('0')) p = '2' + p;
-      const msg = `أهلاً بك أ/ ${name}، نذكركم بموعد قسط (${product}) بقيمة ${amount} ج.م مع غانم ستور (ديروط).`;
-      window.open(`https://wa.me/${p}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     function showSection(sec) {
