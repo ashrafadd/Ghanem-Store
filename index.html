@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ghanem Store | نظام إدارة المبيعات والأقساط وكشوف الحسابات</title>
+  <title>Ghanem Store | برنامج إدارة المبيعات والأقساط والمشترين</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -135,6 +135,23 @@
               </div>
             </div>
 
+            <!-- Guarantor & Notes -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-3 rounded-xl border">
+              <div>
+                <label class="block text-[11px] font-bold text-gray-600 mb-1">اسم الضامن (إن وجد)</label>
+                <input type="text" id="cGuarantorName" placeholder="أحمد علي (أخوه)" class="w-full bg-white border rounded-xl p-2 text-xs outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-gray-600 mb-1">هاتف الضامن</label>
+                <input type="tel" id="cGuarantorPhone" placeholder="011xxxxxxx" class="w-full bg-white border rounded-xl p-2 text-xs outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-gray-600 mb-1">ملاحظات خاصة بالعقد</label>
+                <input type="text" id="cOrderNotes" placeholder="ضمان لمدة سنة / بدون كرتونة..." class="w-full bg-white border rounded-xl p-2 text-xs outline-none">
+              </div>
+            </div>
+
+            <!-- Categories & Item Specs -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-blue-50/60 p-4 rounded-xl border border-blue-100">
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">تصنيف الجهاز</label>
@@ -153,6 +170,18 @@
                 <input type="text" id="pName" placeholder="سامسونج A54 / شاشة توشيبا 55" required class="w-full bg-white border rounded-xl p-2.5 text-sm outline-none">
               </div>
               <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">رقم السيريال / IMEI (إن وجد)</label>
+                <input type="text" id="pSerialNo" placeholder="3569821045" class="w-full bg-white border rounded-xl p-2.5 text-sm outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">التاجر المورد (اختياري)</label>
+                <input type="text" id="pSupplierName" placeholder="تاجر الجملة بأسيوط" class="w-full bg-white border rounded-xl p-2.5 text-sm outline-none">
+              </div>
+            </div>
+
+            <!-- Pricing & Calculation -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl border">
+              <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">السعر الكاش (ج.م) *</label>
                 <input type="number" id="pCash" oninput="calcIslamicPrice()" placeholder="10000" required class="w-full bg-white border rounded-xl p-2.5 text-sm outline-none">
               </div>
@@ -160,9 +189,6 @@
                 <label class="block text-xs font-bold text-gray-600 mb-1">المقدم المدفوع (ج.م) *</label>
                 <input type="number" id="pDown" oninput="calcIslamicPrice()" value="0" class="w-full bg-white border rounded-xl p-2.5 text-sm outline-none">
               </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl border">
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">مدة التقسيط المرنة</label>
                 <select id="pMonths" onchange="calcIslamicPrice()" class="w-full bg-white border rounded-xl p-2.5 text-sm outline-none">
@@ -170,14 +196,6 @@
                   <option value="6" selected>6 أشهر (زيادة 15%)</option>
                   <option value="12">12 شهرًا - سنة (زيادة 25%)</option>
                 </select>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-600 mb-1">إجمالي سعر التقسيط النهائي</label>
-                <input type="text" id="resInstallmentTotal" readonly class="w-full bg-gray-200 font-bold text-blue-900 border rounded-xl p-2.5 text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-600 mb-1">المبلغ المتبقي للتقسيط</label>
-                <input type="text" id="resRemaining" readonly class="w-full bg-gray-200 font-bold text-gray-800 border rounded-xl p-2.5 text-sm">
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">القسط الشهري المحدد</label>
@@ -193,7 +211,7 @@
         </div>
       </section>
 
-      <!-- SECTION 2: ADVANCED CUSTOMERS & LEDGER (إعادة هيكلة كشف العملاء والأجهزة) -->
+      <!-- SECTION 2: ADVANCED CUSTOMERS & LEDGER -->
       <section id="sec-customers" class="hidden space-y-6">
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
           
@@ -218,7 +236,6 @@
                 <label class="block text-[11px] font-bold text-gray-600 mb-1">تصفية حسب حالة السداد</label>
                 <select id="custStatusFilter" onchange="filterCustomersList()" class="bg-white border p-2 rounded-xl text-xs w-full outline-none">
                   <option value="all">كافة العملاء والعقود</option>
-
                   <option value="active">عقود جارية السداد فقط</option>
                   <option value="completed">عقود مكتملة السداد</option>
                   <option value="late">عملاء متأخرون عن السداد</option>
@@ -251,7 +268,7 @@
         </div>
       </section>
 
-      <!-- SECTION 3: SUPPLIERS & PURCHASES (إعادة هيكلة المشتريات والتجار) -->
+      <!-- SECTION 3: SUPPLIERS & PURCHASES (BACK-TO-BACK) -->
       <section id="sec-suppliers" class="hidden space-y-6">
         
         <!-- Summary Cards Header -->
@@ -283,23 +300,37 @@
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
           <div class="flex border-b mb-6 gap-4 text-sm font-bold">
             <button onclick="switchSupplierSubTab('invoices')" id="subnav-invoices" class="pb-3 border-b-2 border-blue-900 text-blue-900 flex items-center gap-2">
-              <i class="fa-solid fa-file-invoice-dollar"></i> تسجيل فاتورة شراء أجهزة
+              <i class="fa-solid fa-file-invoice-dollar"></i> تسجيل فاتورة شراء مباشر للعميل
             </button>
             <button onclick="switchSupplierSubTab('ledger')" id="subnav-ledger" class="pb-3 text-gray-500 hover:text-blue-900 flex items-center gap-2">
               <i class="fa-solid fa-book-bookmark"></i> كشف حساب وتصفية التجار
             </button>
           </div>
 
-          <!-- Sub-Tab 1: Add Purchase Invoice -->
+          <!-- Sub-Tab 1: Add Purchase Invoice (Back to Back) -->
           <div id="subtab-invoices" class="space-y-6">
             <form id="purchaseForm" onsubmit="savePurchase(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-5 rounded-2xl border">
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">اسم التاجر الرئيسي *</label>
                 <input type="text" id="supName" placeholder="تاجر الجملة بأسيوط" required class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
               </div>
+              
+              <!-- Customer Selection Dropdown -->
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">العميل المستفيد من الشراء *</label>
+                <div class="flex gap-1">
+                  <select id="purCustomerSelect" class="w-full bg-white border p-2.5 rounded-xl text-xs outline-none font-bold">
+                    <option value="">-- اختر عميلاً مسجلاً --</option>
+                  </select>
+                  <button type="button" onclick="openNewCustomerModal()" class="bg-yellow-500 hover:bg-yellow-400 text-blue-950 font-bold px-3 rounded-xl text-xs shadow">
+                    +جديد
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">اسم الجهاز / الصنف المشترى *</label>
-                <input type="text" id="purItem" placeholder="5 ثلاجات توشيبا" required class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
+                <input type="text" id="purItem" placeholder="ثلاجة توشيبا 16 قدم" required class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">رقم السيريال / IMEI (إن وجد)</label>
@@ -307,11 +338,15 @@
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">السعر الإجمالي بالفاتورة (ج.م) *</label>
-                <input type="number" id="purTotal" placeholder="50000" required class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
+                <input type="number" id="purTotal" placeholder="15000" required class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-600 mb-1">المبلغ المدفوع كاش (ج.م) *</label>
-                <input type="number" id="purPaid" placeholder="20000" required class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
+                <label class="block text-xs font-bold text-gray-600 mb-1">المبلغ المدفوع كاش للتاجر (ج.م) *</label>
+                <input type="number" id="purPaid" placeholder="5000" required class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-gray-600 mb-1">ملاحظات الفاتورة</label>
+                <input type="text" id="purNotes" placeholder="بضاعة بدون كرتونة / خصم خاص..." class="w-full bg-white border p-2 rounded-xl text-xs outline-none">
               </div>
               <div class="flex items-end">
                 <button type="submit" id="btnSavePurchase" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-2.5 rounded-xl transition shadow flex justify-center items-center gap-2">
@@ -320,22 +355,23 @@
               </div>
             </form>
 
-            <h4 class="font-bold text-md text-blue-900">سجل فواتير المشتريات العامة:</h4>
+            <h4 class="font-bold text-md text-blue-900">سجل فواتير المشتريات المباشرة للعملاء:</h4>
             <div class="overflow-x-auto max-h-80 overflow-y-auto border rounded-xl">
               <table class="w-full text-right text-xs">
                 <thead class="bg-blue-900 text-white font-bold">
                   <tr>
                     <th class="p-3">اسم التاجر</th>
+                    <th class="p-3">العميل المستفيد</th>
                     <th class="p-3">الصنف / الجهاز</th>
                     <th class="p-3">السيريال / IMEI</th>
                     <th class="p-3">الإجمالي</th>
-                    <th class="p-3">المدفوع</th>
-                    <th class="p-3">المتبقي</th>
+                    <th class="p-3">المدفوع للتاجر</th>
+                    <th class="p-3">المتبقي للتاجر</th>
                     <th class="p-3">التاريخ</th>
                   </tr>
                 </thead>
                 <tbody id="globalPurchasesTableBody">
-                  <tr><td colspan="7" class="p-4 text-center text-gray-400">جاري تحميل الفواتير...</td></tr>
+                  <tr><td colspan="8" class="p-4 text-center text-gray-400">جاري تحميل الفواتير...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -397,7 +433,7 @@
         </div>
       </section>
 
-      <!-- SECTION 5: ADMIN TRASH (ASHRAF ONLY) -->
+      <!-- SECTION 5: ADMIN TRASH & SEARCH -->
       <section id="sec-admin" class="hidden space-y-6">
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h3 class="text-lg font-bold text-red-600 mb-2 flex items-center gap-2">
@@ -411,7 +447,61 @@
     </main>
   </div>
 
-  <!-- PRINTABLE STATEMENT MODAL (قالب طباعة كشف الحساب الموحد للعميل والتاجر) -->
+  <!-- ADD NEW CUSTOMER MODAL -->
+  <div id="newCustModal" class="fixed inset-0 bg-black/60 hidden justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h4 class="font-bold text-blue-900 text-md"><i class="fa-solid fa-user-plus text-yellow-500 ml-1"></i> إضافة عميل جديد</h4>
+        <button onclick="closeNewCustomerModal()" class="text-gray-400 hover:text-black font-bold text-lg">&times;</button>
+      </div>
+      <form onsubmit="submitNewCustomerOnly(event)" class="space-y-3">
+        <div><label class="block text-xs font-bold text-gray-600 mb-1">اسم العميل بالكامل *</label><input type="text" id="ncName" required placeholder="محمد أحمد" class="w-full bg-gray-50 border p-2 rounded-xl text-xs outline-none"></div>
+        <div><label class="block text-xs font-bold text-gray-600 mb-1">رقم الهاتف والواتساب *</label><input type="tel" id="ncPhone" required placeholder="010xxxxxxx" class="w-full bg-gray-50 border p-2 rounded-xl text-xs outline-none"></div>
+        <div><label class="block text-xs font-bold text-gray-600 mb-1">القرية / العنوان بديروط *</label><input type="text" id="ncVillage" required placeholder="مسارة" class="w-full bg-gray-50 border p-2 rounded-xl text-xs outline-none"></div>
+        <div><label class="block text-xs font-bold text-gray-600 mb-1">الرقم القومي (14 رقم)</label><input type="text" id="ncNationalID" maxlength="14" placeholder="٢٨٤..." class="w-full bg-gray-50 border p-2 rounded-xl text-xs outline-none"></div>
+        <button type="submit" id="btnSubmitNC" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2.5 rounded-xl text-xs transition">حفظ وإضافة القائمة</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- RESTRUCTURE MODAL (نافذة إعادة هيكلة العقد) -->
+  <div id="restructureModal" class="fixed inset-0 bg-black/60 hidden justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h4 class="font-bold text-blue-900 text-md"><i class="fa-solid fa-rotate text-yellow-500 ml-1"></i> إعادة هيكلة وجدولة العقد</h4>
+        <button onclick="closeRestructureModal()" class="text-gray-400 hover:text-black font-bold text-lg">&times;</button>
+      </div>
+      <form onsubmit="submitRestructure(event)" class="space-y-3">
+        <input type="hidden" id="restructOrderId">
+        <div><label class="block text-xs font-bold text-gray-600 mb-1">الرصيد المتبقي الحالي (ج.م)</label><input type="number" id="restructRem" required class="w-full bg-gray-100 border p-2 rounded-xl text-xs font-bold text-red-600"></div>
+        <div><label class="block text-xs font-bold text-gray-600 mb-1">عدد الأشهر الجديدة</label><input type="number" id="restructMonths" oninput="calcRestructMonthly()" required placeholder="6" class="w-full bg-white border p-2 rounded-xl text-xs outline-none"></div>
+        <div><label class="block text-xs font-bold text-gray-600 mb-1">القسط الشهري الجديد (ج.م)</label><input type="text" id="restructMonthly" readonly class="w-full bg-green-50 border p-2 rounded-xl text-xs font-bold text-green-700"></div>
+        <div><label class="block text-xs font-bold text-gray-600 mb-1">سبب إعادة الجدولة</label><input type="text" id="restructNotes" placeholder="تعثر العميل / اتفاق جديد..." class="w-full bg-white border p-2 rounded-xl text-xs outline-none"></div>
+        <button type="submit" id="btnSubmitRestruct" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2.5 rounded-xl text-xs transition">اعتماد الجدولة الجديدة</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- RETURN MODAL (نافذة تسجيل المرتجع) -->
+  <div id="returnModal" class="fixed inset-0 bg-black/60 hidden justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h4 class="font-bold text-red-600 text-md"><i class="fa-solid fa-box-open text-red-500 ml-1"></i> تسوية مرتجع جهاز</h4>
+        <button onclick="closeReturnModal()" class="text-gray-400 hover:text-black font-bold text-lg">&times;</button>
+      </div>
+      <form onsubmit="submitReturn(event)" class="space-y-3">
+        <input type="hidden" id="retOrderId">
+        <input type="hidden" id="retCustId">
+        <input type="hidden" id="retCustName">
+        <input type="hidden" id="retProdName">
+        <div><label class="block text-xs font-bold text-gray-600 mb-1">المبلغ المسترد كاش للعميل (ج.م)</label><input type="number" id="retRefund" required value="0" class="w-full bg-white border p-2 rounded-xl text-xs outline-none"></div>
+        <div><label class="block text-xs font-bold text-gray-600 mb-1">سبب المرتجع</label><input type="text" id="retReason" required placeholder="عيب صناعة / تراجع العميل..." class="w-full bg-white border p-2 rounded-xl text-xs outline-none"></div>
+        <button type="submit" id="btnSubmitReturn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs transition">تأكيد المرتجع وإلغاء العقد</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PRINTABLE STATEMENT MODAL -->
   <div id="printModal" class="fixed inset-0 bg-black/70 hidden justify-center items-center p-4 z-50">
     <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b pb-3 no-print">
@@ -426,9 +516,7 @@
         </div>
       </div>
 
-      <!-- Printable Area Content -->
       <div id="printableArea" class="bg-white p-6 space-y-6 border rounded-xl text-right">
-        <!-- Header -->
         <div class="flex justify-between items-center border-b-2 border-blue-900 pb-4">
           <div>
             <h2 class="text-2xl font-black text-blue-900">معرض غانم ستور (Ghanem Store)</h2>
@@ -440,14 +528,8 @@
             <span class="text-[11px] text-gray-400 mt-1 block" id="printReportDate">التاريخ: --</span>
           </div>
         </div>
-
-        <!-- Target Info -->
         <div id="printTargetHeader" class="bg-gray-50 p-4 rounded-xl border text-xs grid grid-cols-2 gap-2"></div>
-
-        <!-- Table Data -->
         <div id="printTableContainer" class="space-y-4"></div>
-
-        <!-- Footer Signatures -->
         <div class="pt-8 grid grid-cols-2 text-center text-xs font-bold text-gray-700 border-t mt-8">
           <div>
             <p>توقيع / ختـم الإدارة</p>
@@ -598,12 +680,22 @@
         if (resPay.ok) allPayments = await resPay.json();
         if (resSPay.ok) allSupplierPayments = await resSPay.json();
 
+        populateCustomersDropdown();
         renderGlobalPurchasesTable(allPurchases);
         renderSuppliersList(allSuppliers);
         updateFinanceView();
       } catch (e) {
         console.error("Error loading data:", e);
       }
+    }
+
+    function populateCustomersDropdown() {
+      const select = document.getElementById("purCustomerSelect");
+      if (!select) return;
+      select.innerHTML = '<option value="">-- اختر عميلاً مسجلاً --</option>' +
+        allCustomers.map(function(c) {
+          return '<option value="' + c.CustomerID + '">' + c.Name + ' (' + c.Phone + ' - ' + (c.Village||'') + ')</option>';
+        }).join('');
     }
 
     async function processIDCard(e) {
@@ -664,8 +756,6 @@
       const remaining = Math.max(0, totalInstallment - down);
       const monthly = Math.round(remaining / months);
 
-      document.getElementById("resInstallmentTotal").value = totalInstallment.toLocaleString() + " ج.م";
-      document.getElementById("resRemaining").value = remaining.toLocaleString() + " ج.م";
       document.getElementById("resMonthly").value = monthly.toLocaleString() + " ج.م / شهر";
     }
 
@@ -700,8 +790,12 @@
             phone: document.getElementById("cPhone").value,
             village: document.getElementById("cVillage").value,
             nationalId: document.getElementById("cNationalID").value,
+            guarantorName: document.getElementById("cGuarantorName").value,
+            guarantorPhone: document.getElementById("cGuarantorPhone").value,
             category: cat,
             productName: document.getElementById("pName").value,
+            serialNo: document.getElementById("pSerialNo").value,
+            supplierName: document.getElementById("pSupplierName").value,
             cashPrice: cash,
             installmentPrice: totalInstallment,
             downPayment: down,
@@ -709,6 +803,7 @@
             monthsCount: months,
             monthlyAmount: monthly,
             ratePercent: (rate * 100) + "%",
+            notes: document.getElementById("cOrderNotes").value,
             startDate: new Date().toISOString().split('T')[0]
           })
         });
@@ -810,14 +905,14 @@
       });
       totalPaid = totalSales - totalRemaining;
 
-      const ratingClass = cust.Rating === 'متأخر' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
-      const ratingText = cust.Rating || 'منتظم';
       const natIdText = cust.NationalID || 'غير مسجلة';
+      const guarantorStr = cust.GuarantorName ? (cust.GuarantorName + ' (' + (cust.GuarantorPhone||'-') + ')') : 'بدون ضامن';
 
       let html = '<div class="border-b pb-3 flex justify-between items-center">' +
         '<div>' +
           '<h4 class="font-extrabold text-blue-900 text-lg">' + cust.Name + '</h4>' +
           '<p class="text-xs text-gray-500">القرية: ' + cust.Village + ' | هاتف: ' + cust.Phone + ' | الرقم القومي: ' + natIdText + '</p>' +
+          '<p class="text-[11px] text-blue-800 font-bold mt-1">الضامن: ' + guarantorStr + '</p>' +
         '</div>' +
         '<div class="flex items-center gap-2">' +
           '<button onclick="openCustomerPrintStatement(\'' + cust.CustomerID + '\')" class="bg-blue-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow">' +
@@ -829,7 +924,6 @@
         '</div>' +
       '</div>' +
 
-      '<!-- KPI Cards -->' +
       '<div class="grid grid-cols-4 gap-3 text-center text-xs">' +
         '<div class="bg-gray-50 p-3 rounded-xl border"><span class="text-gray-500 block text-[10px]">إجمالي العقود</span><span class="font-bold text-blue-900 text-sm">' + totalSales.toLocaleString() + ' ج.م</span></div>' +
         '<div class="bg-green-50 p-3 rounded-xl border border-green-100"><span class="text-green-700 block text-[10px]">المسدد فعلياً</span><span class="font-bold text-green-700 text-sm">' + totalPaid.toLocaleString() + ' ج.م</span></div>' +
@@ -844,28 +938,34 @@
         const monthly = Number(o.MonthlyAmount) || 0;
         const rem = Number(o.RemainingAmount) || 0;
         const prodName = o.ProductName || 'جهاز غير معرف';
-        const catName = o.Category || 'عام';
+        const serialStr = o.SerialNo ? (' | سيريال: ' + o.SerialNo) : '';
 
-        let btnPayHtml = rem > 0 ? 
-          '<button onclick="openPayModal(\'' + o.OrderID + '\', \'' + cust.CustomerID + '\', \'' + prodName + '\', ' + o.MonthlyAmount + ')" class="bg-green-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold shadow">تحصيل قسط</button>' :
-          '<span class="text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded border border-green-200">مكتمل</span>';
+        let actionBtns = '';
+        if (rem > 0) {
+          actionBtns = '<div class="flex items-center gap-1">' +
+            '<button onclick="openPayModal(\'' + o.OrderID + '\', \'' + cust.CustomerID + '\', \'' + prodName + '\', ' + o.MonthlyAmount + ')" class="bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold">تحصيل</button>' +
+            '<button onclick="openRestructureModal(\'' + o.OrderID + '\', ' + rem + ')" class="bg-blue-900 text-white px-2 py-1 rounded text-[10px] font-bold">جدولة</button>' +
+            '<button onclick="openReturnModal(\'' + o.OrderID + '\', \'' + cust.CustomerID + '\', \'' + cust.Name + '\', \'' + prodName + '\')" class="bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold">مرتجع</button>' +
+          '</div>';
+        } else {
+          actionBtns = '<span class="text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded border border-green-200">' + (o.OrderStatus || 'مكتمل') + '</span>';
+        }
 
         return '<div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center text-xs">' +
           '<div>' +
-            '<span class="font-bold text-blue-900 block">' + prodName + ' (' + catName + ')</span>' +
-            '<span class="text-[10px] text-gray-500">بداية العقد: ' + (o.StartDate || '-') + ' | الإجمالي: ' + (Number(o.InstallmentPrice)||0).toLocaleString() + ' ج.م</span>' +
+            '<span class="font-bold text-blue-900 block">' + prodName + serialStr + '</span>' +
+            '<span class="text-[10px] text-gray-500">بداية العقد: ' + (o.StartDate || '-') + ' | التاجر المورد: ' + (o.SupplierName||'-') + '</span>' +
           '</div>' +
           '<div class="text-left space-y-1">' +
             '<span class="font-bold text-green-700 block">' + monthly.toLocaleString() + ' ج.م / شهر</span>' +
             '<span class="text-[10px] text-red-600 block">المتبقي: ' + rem.toLocaleString() + ' ج.م</span>' +
-            btnPayHtml +
+            actionBtns +
           '</div>' +
         '</div>';
       }).join('');
 
       html += '</div>' +
 
-      '<!-- Payment History Ledger -->' +
       '<h5 class="font-bold text-xs text-blue-900 mt-4"><i class="fa-solid fa-receipt ml-1"></i> سجل الأقساط والدفعات المحصلة:</h5>' +
       '<div class="overflow-x-auto max-h-40 overflow-y-auto border rounded-xl">' +
         '<table class="w-full text-right text-[11px]">' +
@@ -880,6 +980,122 @@
       '</div>';
 
       view.innerHTML = html;
+    }
+
+    // NEW CUSTOMER MODAL
+    function openNewCustomerModal() {
+      document.getElementById("newCustModal").classList.remove("hidden");
+      document.getElementById("newCustModal").classList.add("flex");
+    }
+    function closeNewCustomerModal() {
+      document.getElementById("newCustModal").classList.add("hidden");
+      document.getElementById("newCustModal").classList.remove("flex");
+    }
+    async function submitNewCustomerOnly(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnSubmitNC");
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "saveCustomerOnly",
+            name: document.getElementById("ncName").value,
+            phone: document.getElementById("ncPhone").value,
+            village: document.getElementById("ncVillage").value,
+            nationalId: document.getElementById("ncNationalID").value
+          })
+        });
+        alert("تم إضافة العيل بنجاح!");
+        closeNewCustomerModal();
+        loadAllData();
+      } catch (err) {
+        alert("حدث خطأ أثناء الإضافة.");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // RESTRUCTURE & RETURN MODAL
+    function openRestructureModal(orderId, currentRem) {
+      document.getElementById("restructOrderId").value = orderId;
+      document.getElementById("restructRem").value = currentRem;
+      document.getElementById("restructureModal").classList.remove("hidden");
+      document.getElementById("restructureModal").classList.add("flex");
+    }
+    function closeRestructureModal() {
+      document.getElementById("restructureModal").classList.add("hidden");
+      document.getElementById("restructureModal").classList.remove("flex");
+    }
+    function calcRestructMonthly() {
+      const rem = parseFloat(document.getElementById("restructRem").value) || 0;
+      const m = parseInt(document.getElementById("restructMonths").value) || 1;
+      const monthly = Math.round(rem / m);
+      document.getElementById("restructMonthly").value = monthly.toLocaleString() + " ج.م / شهر";
+    }
+    async function submitRestructure(e) {
+      e.preventDefault();
+      const rem = parseFloat(document.getElementById("restructRem").value) || 0;
+      const m = parseInt(document.getElementById("restructMonths").value) || 1;
+      const monthly = Math.round(rem / m);
+
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "restructureOrder",
+            orderId: document.getElementById("restructOrderId").value,
+            newRemainingAmount: rem,
+            newMonthsCount: m,
+            newMonthlyAmount: monthly,
+            notes: document.getElementById("restructNotes").value
+          })
+        });
+        alert("تمت إعادة هيكلة العقد بنجاح!");
+        closeRestructureModal();
+        loadAllData();
+      } catch (err) {
+        alert("حدث خطأ أثناء حفظ الجدولة.");
+      }
+    }
+
+    function openReturnModal(orderId, custId, custName, prodName) {
+      document.getElementById("retOrderId").value = orderId;
+      document.getElementById("retCustId").value = custId;
+      document.getElementById("retCustName").value = custName;
+      document.getElementById("retProdName").value = prodName;
+      document.getElementById("returnModal").classList.remove("hidden");
+      document.getElementById("returnModal").classList.add("flex");
+    }
+    function closeReturnModal() {
+      document.getElementById("returnModal").classList.add("hidden");
+      document.getElementById("returnModal").classList.remove("flex");
+    }
+    async function submitReturn(e) {
+      e.preventDefault();
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "processReturn",
+            orderId: document.getElementById("retOrderId").value,
+            customerId: document.getElementById("retCustId").value,
+            customerName: document.getElementById("retCustName").value,
+            productName: document.getElementById("retProdName").value,
+            amountRefunded: parseFloat(document.getElementById("retRefund").value) || 0,
+            reason: document.getElementById("retReason").value
+          })
+        });
+        alert("تم تسجيل المرتجع وإلغاء العقد بنجاح!");
+        closeReturnModal();
+        loadAllData();
+      } catch (err) {
+        alert("حدث خطأ أثناء معالجة المرتجع.");
+      }
     }
 
     // SUPPLIERS & PURCHASES FUNCTIONS
@@ -898,6 +1114,10 @@
       const btn = document.getElementById("btnSavePurchase");
       btn.disabled = true;
 
+      const custSelect = document.getElementById("purCustomerSelect");
+      const custId = custSelect.value;
+      const custName = custSelect.options[custSelect.selectedIndex] ? custSelect.options[custSelect.selectedIndex].text : "-";
+
       try {
         await fetch(API_URL, {
           method: "POST",
@@ -905,10 +1125,13 @@
           body: JSON.stringify({
             action: "addPurchase",
             supplierName: document.getElementById("supName").value,
+            customerId: custId,
+            customerName: custName,
             itemName: document.getElementById("purItem").value,
             serialNo: document.getElementById("purSerial").value,
             totalPrice: parseFloat(document.getElementById("purTotal").value) || 0,
-            amountPaid: parseFloat(document.getElementById("purPaid").value) || 0
+            amountPaid: parseFloat(document.getElementById("purPaid").value) || 0,
+            notes: document.getElementById("purNotes").value
           })
         });
 
@@ -925,13 +1148,14 @@
     function renderGlobalPurchasesTable(list) {
       const tbody = document.getElementById("globalPurchasesTableBody");
       if (!list || list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-400">لا توجد فواتير مشتريات مسجلة</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-gray-400">لا توجد فواتير مشتريات مسجلة</td></tr>';
         return;
       }
 
       tbody.innerHTML = list.map(function(p) {
         return '<tr class="border-b hover:bg-gray-50">' +
           '<td class="p-3 font-bold text-blue-900">' + p.SupplierName + '</td>' +
+          '<td class="p-3 font-semibold text-gray-700">' + (p.CustomerName || '-') + '</td>' +
           '<td class="p-3">' + p.ItemName + '</td>' +
           '<td class="p-3 font-mono text-gray-600">' + (p.SerialNo || '-') + '</td>' +
           '<td class="p-3 font-bold">' + (Number(p.TotalPrice)||0).toLocaleString() + ' ج.م</td>' +
@@ -981,7 +1205,6 @@
         '</div>' +
       '</div>' +
 
-      '<!-- Pay Supplier Debt Form -->' +
       '<form onsubmit="paySupplierDebt(event)" class="grid grid-cols-3 gap-3 bg-green-50/60 p-4 rounded-xl border border-green-100">' +
         '<input type="hidden" id="selectedSupId" value="' + (sup ? sup.SupplierID : id) + '">' +
         '<input type="hidden" id="selectedSupName" value="' + name + '">' +
@@ -990,21 +1213,19 @@
         '<div class="flex items-end"><button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold p-2 rounded-xl text-xs transition shadow">خصم السداد</button></div>' +
       '</form>' +
 
-      '<!-- Supplier Purchases -->' +
       '<h5 class="font-bold text-xs text-blue-900 mt-3"><i class="fa-solid fa-boxes-stacked ml-1"></i> كشف فواتير المشتريات من التاجر:</h5>' +
       '<div class="overflow-x-auto max-h-40 overflow-y-auto border rounded-xl">' +
         '<table class="w-full text-right text-[11px]">' +
-          '<thead class="bg-gray-100 font-bold"><tr><th class="p-2">الصنف</th><th class="p-2">السيريال</th><th class="p-2">الإجمالي</th><th class="p-2">المدفوع</th><th class="p-2">المتبقي</th></tr></thead>' +
+          '<thead class="bg-gray-100 font-bold"><tr><th class="p-2">العميل المستفيد</th><th class="p-2">الصنف</th><th class="p-2">السيريال</th><th class="p-2">الإجمالي</th><th class="p-2">المدفوع</th><th class="p-2">المتبقي</th></tr></thead>' +
           '<tbody>' +
-            (purchases.length === 0 ? '<tr><td colspan="5" class="p-3 text-center text-gray-400">لا توجد مشتريات مسجلة</td></tr>' :
+            (purchases.length === 0 ? '<tr><td colspan="6" class="p-3 text-center text-gray-400">لا توجد مشتريات مسجلة</td></tr>' :
               purchases.map(function(p) {
-                return '<tr class="border-b"><td class="p-2 font-semibold">' + p.ItemName + '</td><td class="p-2 text-gray-500">' + (p.SerialNo||'-') + '</td><td class="p-2">' + (Number(p.TotalPrice)||0).toLocaleString() + ' ج.م</td><td class="p-2 text-green-600">' + (Number(p.AmountPaid)||0).toLocaleString() + ' ج.م</td><td class="p-2 text-red-600 font-bold">' + (Number(p.RemainingDebt)||0).toLocaleString() + ' ج.م</td></tr>';
+                return '<tr class="border-b"><td class="p-2 text-blue-900 font-bold">' + (p.CustomerName||'-') + '</td><td class="p-2 font-semibold">' + p.ItemName + '</td><td class="p-2 text-gray-500">' + (p.SerialNo||'-') + '</td><td class="p-2">' + (Number(p.TotalPrice)||0).toLocaleString() + ' ج.م</td><td class="p-2 text-green-600">' + (Number(p.AmountPaid)||0).toLocaleString() + ' ج.م</td><td class="p-2 text-red-600 font-bold">' + (Number(p.RemainingDebt)||0).toLocaleString() + ' ج.م</td></tr>';
               }).join('')) +
           '</tbody>' +
         '</table>' +
       '</div>' +
 
-      '<!-- Supplier Payments History -->' +
       '<h5 class="font-bold text-xs text-blue-900 mt-3"><i class="fa-solid fa-hand-holding-dollar ml-1"></i> كشف المدفوعات المسددة للتاجر:</h5>' +
       '<div class="overflow-x-auto max-h-36 overflow-y-auto border rounded-xl">' +
         '<table class="w-full text-right text-[11px]">' +
@@ -1110,10 +1331,10 @@
 
       let html = '<h5 class="font-bold text-xs text-blue-900">فواتير المشتريات والأجهزة:</h5>' +
       '<table class="w-full text-right text-xs border">' +
-        '<thead class="bg-gray-100 font-bold"><tr><th class="p-2 border">الصنف / الجهاز</th><th class="p-2 border">السيريال/IMEI</th><th class="p-2 border">الإجمالي</th><th class="p-2 border">المدفوع</th><th class="p-2 border">المتبقي</th></tr></thead>' +
+        '<thead class="bg-gray-100 font-bold"><tr><th class="p-2 border">العميل المستفيد</th><th class="p-2 border">الصنف / الجهاز</th><th class="p-2 border">السيريال/IMEI</th><th class="p-2 border">الإجمالي</th><th class="p-2 border">المدفوع</th><th class="p-2 border">المتبقي</th></tr></thead>' +
         '<tbody>' +
           purchases.map(function(p) {
-            return '<tr><td class="p-2 border font-bold">' + p.ItemName + '</td><td class="p-2 border font-mono">' + (p.SerialNo||'-') + '</td><td class="p-2 border">' + (Number(p.TotalPrice)||0).toLocaleString() + ' ج.م</td><td class="p-2 border text-green-600">' + (Number(p.AmountPaid)||0).toLocaleString() + ' ج.م</td><td class="p-2 border text-red-600 font-bold">' + (Number(p.RemainingDebt)||0).toLocaleString() + ' ج.م</td></tr>';
+            return '<tr><td class="p-2 border font-bold text-blue-900">' + (p.CustomerName||'-') + '</td><td class="p-2 border font-bold">' + p.ItemName + '</td><td class="p-2 border font-mono">' + (p.SerialNo||'-') + '</td><td class="p-2 border">' + (Number(p.TotalPrice)||0).toLocaleString() + ' ج.م</td><td class="p-2 border text-green-600">' + (Number(p.AmountPaid)||0).toLocaleString() + ' ج.م</td><td class="p-2 border text-red-600 font-bold">' + (Number(p.RemainingDebt)||0).toLocaleString() + ' ج.م</td></tr>';
           }).join('') +
         '</tbody>' +
       '</table>' +
