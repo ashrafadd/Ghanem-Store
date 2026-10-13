@@ -3,449 +3,378 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>غانم ستور | Ghanem Store - كاش وتقسيط مرن</title>
-
+  <title>Ghanem Store | برنامج إدارة المبيعات والأقساط</title>
+  
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
   <!-- Google Font: Cairo -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    body {
-      font-family: 'Cairo', sans-serif;
-      background-color: #f8fafc;
-    }
-    .active-tab {
-      background-color: #1e3a8a !important;
-      color: #ffffff !important;
-    }
+    body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
+    .active-nav { background-color: #1e3a8a !important; color: #ffffff !important; }
   </style>
 </head>
-<body class="text-gray-800 antialiased pb-12">
+<body class="text-gray-800 antialiased">
 
-  <!-- Header / Navigation -->
-  <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center space-x-3 space-x-reverse">
-        <div class="bg-yellow-500 text-blue-900 font-extrabold text-xl px-3 py-1 rounded-lg shadow">G</div>
-        <div>
-          <h1 class="text-xl font-bold tracking-wide">غانم ستور</h1>
-          <p class="text-xs text-blue-200">للأجهزة الكهربائية والهواتف | ديروط وقراها</p>
-        </div>
+  <!-- ==================== 1. شاشة تسجيل الدخول ==================== -->
+  <div id="loginScreen" class="fixed inset-0 bg-blue-950 flex justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full border border-gray-100 text-right">
+      <div class="text-center mb-6">
+        <div class="bg-yellow-500 text-blue-950 font-black text-3xl w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">G</div>
+        <h2 class="text-2xl font-black text-blue-900">غانم ستور</h2>
+        <p class="text-xs text-gray-500 mt-1">برنامج إدارة المبيعات والأقساط والمشتريات - ديروط</p>
       </div>
-      
-      <!-- Navigation Tabs -->
-      <nav class="flex bg-blue-950 p-1 rounded-xl text-sm font-semibold">
-        <button id="btnCustomerTab" onclick="switchTab('customer')" class="active-tab px-4 py-2 rounded-lg transition-all flex items-center space-x-2 space-x-reverse">
-          <i class="fa-solid fa-store"></i>
-          <span>المتجر</span>
+
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">البريد الإلكتروني</label>
+          <input type="email" id="loginEmail" required class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-600 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">كلمة المرور</label>
+          <input type="password" id="loginPassword" required class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-600 outline-none">
+        </div>
+        <button type="submit" id="btnLogin" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl transition shadow-lg flex justify-center items-center gap-2">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>تسجيل الدخول</span>
         </button>
-        <button id="btnAdminTab" onclick="switchTab('admin')" class="px-4 py-2 rounded-lg text-blue-200 hover:text-white transition-all flex items-center space-x-2 space-x-reverse">
-          <i class="fa-solid fa-user-shield"></i>
-          <span>لوحة التحكم (أ/ غانم)</span>
-        </button>
-      </nav>
+      </form>
     </div>
-  </header>
+  </div>
 
-  <!-- Container -->
-  <main class="max-w-6xl mx-auto px-4 mt-6">
-
-    <!-- ==================== 1. واجهة العملاء ==================== -->
-    <section id="customerView" class="space-y-6">
-      
-      <!-- Hero Banner -->
-      <div class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden">
-        <div class="relative z-10">
-          <span class="bg-yellow-500 text-blue-950 text-xs font-bold px-3 py-1 rounded-full uppercase">خدمة مميزة لأهل ديروط</span>
-          <h2 class="text-2xl md:text-3xl font-extrabold mt-2">اشتري أجهزتك الكهربائية والموبايل بكاش أو تقسيط مرن!</h2>
-          <p class="text-blue-100 text-sm mt-1">مقدمات مرنة، بدون تعقيدات، وأقساط تناسب ميزانيتك في كافة قرى مركز ديروط.</p>
+  <!-- ==================== 2. الواجهة الرئيسية للتطبيق ==================== -->
+  <div id="appScreen" class="hidden min-h-screen pb-12">
+    <!-- Header -->
+    <header class="bg-blue-900 text-white shadow-md sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center space-x-3 space-x-reverse">
+          <span class="bg-yellow-500 text-blue-950 font-extrabold px-3 py-1 rounded-lg text-sm">Ghanem Store</span>
+          <span id="userInfo" class="text-xs text-blue-200">مرحباً بك</span>
         </div>
-      </div>
-
-      <!-- Installment Calculator Card -->
-      <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        <h3 class="text-lg font-bold text-blue-900 flex items-center mb-4">
-          <i class="fa-solid fa-calculator text-yellow-500 ml-2"></i>
-          حاسبة التقسيط المرن السريعة
-        </h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-gray-600 mb-1">إجمالي سعر الجهاز (ج.م):</label>
-            <input type="number" id="calcTotalPrice" value="15000" oninput="calculateInstallment()" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-600 mb-1">المقدم المدفوع (ج.م):</label>
-            <input type="number" id="calcDownPayment" value="3000" oninput="calculateInstallment()" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-600 mb-1">عدد الأشهر:</label>
-            <select id="calcMonths" onchange="calculateInstallment()" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none">
-              <option value="3">3 أشهر</option>
-              <option value="6" selected>6 أشهر</option>
-              <option value="9">9 أشهر</option>
-              <option value="12">12 شهرًا</option>
-              <option value="18">18 شهرًا</option>
-              <option value="24">24 شهرًا</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Result Box -->
-        <div class="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex justify-between items-center">
-          <div>
-            <span class="text-xs text-gray-500 block">المبلغ المتبقي للتقسيط:</span>
-            <span id="resRemaining" class="text-lg font-bold text-blue-900">12,000 ج.م</span>
-          </div>
-          <div class="text-left">
-            <span class="text-xs text-gray-500 block">القسط الشهري التقديري:</span>
-            <span id="resMonthly" class="text-2xl font-extrabold text-green-600">2,000 ج.م / شهر</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Request Modal Form -->
-      <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center">
-          <i class="fa-solid fa-paper-plane text-blue-600 ml-2"></i>
-          تقديم طلب تقسيط أو كاش جديد
-        </h3>
-
-        <form id="orderForm" onsubmit="submitOrder(event)" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">اسم العميل بالكامل *</label>
-              <input type="text" id="custName" required placeholder="مثال: أحمد محمد علي" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">رقم الهاتف *</label>
-              <input type="tel" id="custPhone" required placeholder="01012345678" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">رقم الواتساب *</label>
-              <input type="tel" id="custWhatsapp" required placeholder="01012345678" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">القرية / العنوان بديروط *</label>
-              <input type="text" id="custVillage" required placeholder="مثال: مسارة - الشارع الرئيسي" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">الجهاز المطلوب *</label>
-              <input type="text" id="custProduct" required placeholder="مثال: شاشة سامسونج 55 بوصة / أيفون 15" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">رابط صورة البطاقة الشخصية (اختياري)</label>
-              <input type="url" id="custCardUrl" placeholder="رابط الصورة من جوجل درايف أو موقع رفع" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-          </div>
-
-          <button type="submit" id="btnSubmitOrder" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all flex justify-center items-center space-x-2 space-x-reverse">
-            <i class="fa-solid fa-check"></i>
-            <span>إرسال الطلب إلى أ/ غانم</span>
-          </button>
-        </form>
-      </div>
-
-    </section>
-
-    <!-- ==================== 2. لوحة تحكم الآدمن (أ/ غانم) ==================== -->
-    <section id="adminView" class="hidden space-y-6">
-
-      <!-- Admin Top Banner -->
-      <div class="bg-gray-900 text-white rounded-2xl p-6 shadow-md flex justify-between items-center">
-        <div>
-          <h2 class="text-xl font-bold flex items-center">
-            <i class="fa-solid fa-user-gear text-yellow-500 ml-2"></i>
-            أهلاً بك أستاذ غانم (إدارة المبيعات والأقساط)
-          </h2>
-          <p class="text-xs text-gray-400 mt-1">متابعة العملاء، الأقساط، والتصنيفات في مركز ديروط</p>
-        </div>
-        <button onclick="loadAdminData()" class="bg-blue-600 hover:bg-blue-700 text-xs px-4 py-2 rounded-lg font-bold transition">
-          <i class="fa-solid fa-arrows-rotate ml-1"></i> تحديث البيانات
+        <button onclick="logout()" class="text-xs bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1">
+          <i class="fa-solid fa-power-off"></i> خروج
         </button>
       </div>
+    </header>
 
-      <!-- Admin Customers Table -->
-      <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center">
-          <i class="fa-solid fa-users text-blue-600 ml-2"></i>
-          قائمة العملاء وتصنيفات السداد
-        </h3>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-right text-gray-600">
-            <thead class="bg-gray-100 text-gray-700 font-bold uppercase text-xs">
-              <tr>
-                <th class="p-3">الاسم</th>
-                <th class="p-3">العنوان / القرية</th>
-                <th class="p-3">الواتساب</th>
-                <th class="p-3">التصنيف</th>
-                <th class="p-3">الحالة</th>
-                <th class="p-3 text-center">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody id="customersTableBody">
-              <tr>
-                <td colspan="6" class="p-4 text-center text-gray-400">جاري تحميل البيانات من السيرفر...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <!-- Navigation Tabs -->
+    <div class="max-w-7xl mx-auto px-4 mt-4">
+      <div class="bg-white p-2 rounded-2xl shadow-sm flex flex-wrap gap-2 text-sm font-bold border border-gray-100">
+        <button onclick="showSection('installments')" id="nav-installments" class="active-nav px-4 py-2.5 rounded-xl flex items-center gap-2 transition">
+          <i class="fa-solid fa-calculator"></i> الأقساط والعملاء
+        </button>
+        <button onclick="showSection('suppliers')" id="nav-suppliers" class="px-4 py-2.5 rounded-xl flex items-center gap-2 text-gray-600 transition">
+          <i class="fa-solid fa-truck-field"></i> المشتريات والتجار
+        </button>
+        <button id="nav-finance" onclick="showSection('finance')" class="px-4 py-2.5 rounded-xl flex items-center gap-2 text-gray-600 transition">
+          <i class="fa-solid fa-chart-line"></i> الخزينة والأرباح (خاص بغانم)
+        </button>
+        <button id="nav-admin" onclick="showSection('admin')" class="px-4 py-2.5 rounded-xl flex items-center gap-2 text-gray-600 transition hidden">
+          <i class="fa-solid fa-user-shield"></i> لوحة الأدمن واسترجاع المحذوفات
+        </button>
       </div>
+    </div>
 
-      <!-- Orders Table -->
-      <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center">
-          <i class="fa-solid fa-file-invoice-dollar text-green-600 ml-2"></i>
-          طلبات التقسيط والتحصيل
-        </h3>
+    <!-- MAIN SECTIONS CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 mt-6">
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-right text-gray-600">
-            <thead class="bg-gray-100 text-gray-700 font-bold uppercase text-xs">
-              <tr>
-                <th class="p-3">العميل</th>
-                <th class="p-3">الجهاز</th>
-                <th class="p-3">المبلغ الإجمالي</th>
-                <th class="p-3">المقدم</th>
-                <th class="p-3">القسط الشهري</th>
-                <th class="p-3 text-center">إرسال تذكير</th>
-              </tr>
-            </thead>
-            <tbody id="ordersTableBody">
-              <tr>
-                <td colspan="6" class="p-4 text-center text-gray-400">جاري تحميل الطلبات...</td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- SECTION 1: INSTALLMENTS & CUSTOMERS -->
+      <section id="sec-installments" class="space-y-6">
+        <!-- New Order Form -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+          <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-cart-plus text-yellow-500"></i>
+            تسجيل عملية بيع وتقسيط جديدة (مطابق للشريعة الإسلامية)
+          </h3>
+
+          <form onsubmit="saveCustomerAndOrder(event)" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">اسم العميل بالكامل *</label>
+                <input type="text" id="cName" required placeholder="مثال: محمد أحمد علي" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">رقم الهاتف *</label>
+                <input type="tel" id="cPhone" required placeholder="010xxxxxxx" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">رقم الواتساب *</label>
+                <input type="tel" id="cWhatsapp" required placeholder="010xxxxxxx" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">القرية / العنوان بديروط *</label>
+                <input type="text" id="cVillage" required placeholder="مثال: مسارة - الشارع الرئيسي" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600">
+              </div>
+            </div>
+
+            <!-- Product Dropdown & Pricing -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-blue-50/60 p-4 rounded-xl border border-blue-100">
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">تصنيف الجهاز</label>
+                <select id="pCategory" class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-sm outline-none">
+                  <option value="هواتف ذكية">هواتف ذكية</option>
+                  <option value="أجهزة منزلية">أجهزة منزلية كهربائية</option>
+                  <option value="أجهزة تكييف">أجهزة تكييف وتبريد</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">اسم الجهاز / الموديل *</label>
+                <input type="text" id="pName" placeholder="سامسونج A54 / شاشة توشيبا 55" required class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-sm outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">السعر الكاش (ج.م) *</label>
+                <input type="number" id="pCash" oninput="calcIslamicPrice()" placeholder="10000" required class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-sm outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">المقدم المدفوع (ج.م) *</label>
+                <input type="number" id="pDown" oninput="calcIslamicPrice()" value="0" class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-sm outline-none">
+              </div>
+            </div>
+
+            <!-- Islamic Rate Calculator -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl border">
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">مدة التقسيط المرنة</label>
+                <select id="pMonths" onchange="calcIslamicPrice()" class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-sm outline-none">
+                  <option value="4">4 أشهر (زيادة 7%)</option>
+                  <option value="6" selected>6 أشهر (زيادة 15%)</option>
+                  <option value="12">12 شهرًا - سنة (زيادة 25%)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">إجمالي سعر التقسيط النهائي</label>
+                <input type="text" id="resInstallmentTotal" readonly class="w-full bg-gray-200 font-bold text-blue-900 border border-gray-300 rounded-xl p-2.5 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">المبلغ المتبقي للتقسيط</label>
+                <input type="text" id="resRemaining" readonly class="w-full bg-gray-200 font-bold text-gray-800 border border-gray-300 rounded-xl p-2.5 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">القسط الشهري المحدد</label>
+                <input type="text" id="resMonthly" readonly class="w-full bg-green-100 font-extrabold text-green-700 border border-green-300 rounded-xl p-2.5 text-sm">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">رابط صورة البطاقة الشخصية للعميل (اختياري)</label>
+              <input type="url" id="cCardUrl" placeholder="https://..." class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm outline-none">
+            </div>
+
+            <button type="submit" id="btnSaveOrder" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-md transition flex justify-center items-center gap-2">
+              <i class="fa-solid fa-check-circle"></i>
+              <span>اعتماد العملية وحفظها في قاعدة البيانات</span>
+            </button>
+          </form>
         </div>
-      </div>
+      </section>
 
-    </section>
+      <!-- SECTION 2: SUPPLIERS & PURCHASES -->
+      <section id="sec-suppliers" class="hidden space-y-6">
+        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+          <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-boxes-packing text-blue-600"></i>
+            تسجيل مشتريات الأجهزة من كبار التجار
+          </h3>
+          <form onsubmit="savePurchase(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">اسم التاجر الرئيسي *</label>
+              <input type="text" id="supName" placeholder="مثال: تاجر الجملة بأسيوط" required class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded-xl text-sm outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">اسم الجهاز / الصنف المشترى *</label>
+              <input type="text" id="purItem" placeholder="مثال: 5 ثلاجات توشيبا" required class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded-xl text-sm outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">رقم السيريال / IMEI (إن وجد)</label>
+              <input type="text" id="purSerial" placeholder="مثال: 3569821045" class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded-xl text-sm outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">السعر الإجمالي (ج.م) *</label>
+              <input type="number" id="purTotal" placeholder="50000" required class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded-xl text-sm outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-600 mb-1">المبلغ المدفوع كاش (ج.م) *</label>
+              <input type="number" id="purPaid" placeholder="20000" required class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded-xl text-sm outline-none">
+            </div>
+            <div class="flex items-end">
+              <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-2.5 rounded-xl transition shadow">
+                حفظ الشراء وخصم من حساب التاجر
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
 
-  </main>
+      <!-- SECTION 3: FINANCE (GHANEM ONLY) -->
+      <section id="sec-finance" class="hidden space-y-6">
+        <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-2xl p-6 shadow-lg">
+          <h3 class="text-xl font-bold flex items-center gap-2">
+            <i class="fa-solid fa-coins text-yellow-400"></i>
+            تقرير الخزينة والسيولة النقدية والأرباح (خاص بغانم)
+          </h3>
+          <p class="text-xs text-blue-200 mt-1">هذه البيانات مشفرة ولا تظهر إلا بحساب أ/ غانم فقط ولا يمكن للأدمن الاطلاع عليها.</p>
+        </div>
+      </section>
 
-  <!-- Notification Toast -->
-  <div id="toast" class="fixed bottom-5 left-5 bg-blue-900 text-white px-5 py-3 rounded-xl shadow-2xl hidden transition-all z-50">
-    <span id="toastMessage">تمت العملية بنجاح</span>
+      <!-- SECTION 4: ADMIN TRASH (ASHRAF ONLY) -->
+      <section id="sec-admin" class="hidden space-y-6">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h3 class="text-lg font-bold text-red-600 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-trash-arrow-up"></i>
+            سجل المحذوفات والتصحيح التقني (خاص بالأدمن)
+          </h3>
+          <p class="text-xs text-gray-500">خاص بالأدمن أ/ أشرف الديب للتصحيح وإعادة استرجاع البيانات المحذوفة خطأ وإدارة الجلسات.</p>
+        </div>
+      </section>
+
+    </main>
   </div>
 
   <script>
-    // رابط Google Apps Script الخاص بك
-    const API_URL = "https://script.google.com/macros/s/AKfycbxg09zV2aTTH9UsWq_cfdg2xMkaRqRjd2BaTx_q6kg3Fw0YV_Gv8C7giW0MfRHOSMoc/exec";
+    // رابط API الجديد الخاص بك
+    const API_URL = "https://script.google.com/macros/s/AKfycbzXQcRID27rFL18HRj4v7_n-L_JURBrKGzIHC_Tnq0mpJa0TlwykeBbc3d9tBHmXCg/exec";
+    let currentUser = null;
 
-    // التنقل بين التبويبات
-    function switchTab(tab) {
-      const custView = document.getElementById("customerView");
-      const adminView = document.getElementById("adminView");
-      const btnCust = document.getElementById("btnCustomerTab");
-      const btnAdmin = document.getElementById("btnAdminTab");
+    // تسجيل الدخول
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnLogin");
+      btn.disabled = true;
+      btn.innerText = "جاري التحقق...";
 
-      if (tab === 'customer') {
-        custView.classList.remove("hidden");
-        adminView.classList.add("hidden");
-        btnCust.classList.add("active-tab");
-        btnAdmin.classList.remove("active-tab");
-      } else {
-        custView.classList.add("hidden");
-        adminView.classList.remove("hidden");
-        btnAdmin.classList.add("active-tab");
-        btnCust.classList.remove("active-tab");
-        loadAdminData(); // تحميل بيانات الآدمن
+      const email = document.getElementById("loginEmail").value;
+      const pass = document.getElementById("loginPassword").value;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "login", email: email, password: pass })
+        });
+        const data = await res.json();
+
+        if (data.status === "success") {
+          currentUser = data;
+          document.getElementById("loginScreen").classList.add("hidden");
+          document.getElementById("appScreen").classList.remove("hidden");
+          document.getElementById("userInfo").innerText = `المستخدم: ${data.name}`;
+
+          // تطبيق الصلاحيات الدقيقة
+          if (data.role === 'admin') {
+            document.getElementById("nav-admin").classList.remove("hidden");
+            document.getElementById("nav-finance").classList.add("hidden"); // حجب الخزينة والأرباح عن الأدمن
+          } else {
+            document.getElementById("nav-finance").classList.remove("hidden");
+            document.getElementById("nav-admin").classList.add("hidden");
+          }
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        alert("حدث خطأ أثناء الاتصال بالسيرفر، يرجى إعادة المحاولة.");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "تسجيل الدخول";
       }
     }
 
-    // حاسبة التقسيط
-    function calculateInstallment() {
-      const total = parseFloat(document.getElementById("calcTotalPrice").value) || 0;
-      const down = parseFloat(document.getElementById("calcDownPayment").value) || 0;
-      const months = parseInt(document.getElementById("calcMonths").value) || 1;
+    // حساب حاسبة التقسيط الشرعية
+    function calcIslamicPrice() {
+      const cash = parseFloat(document.getElementById("pCash").value) || 0;
+      const down = parseFloat(document.getElementById("pDown").value) || 0;
+      const months = parseInt(document.getElementById("pMonths").value) || 6;
 
-      const remaining = Math.max(0, total - down);
+      let rate = 0.15;
+      if (months === 4) rate = 0.07;
+      if (months === 12) rate = 0.25;
+
+      const totalInstallment = Math.round(cash * (1 + rate));
+      const remaining = Math.max(0, totalInstallment - down);
       const monthly = Math.round(remaining / months);
 
-      document.getElementById("resRemaining").innerText = remaining.toLocaleString() + " ج.م";
-      document.getElementById("resMonthly").innerText = monthly.toLocaleString() + " ج.م / شهر";
+      document.getElementById("resInstallmentTotal").value = totalInstallment.toLocaleString() + " ج.م";
+      document.getElementById("resRemaining").value = remaining.toLocaleString() + " ج.م";
+      document.getElementById("resMonthly").value = monthly.toLocaleString() + " ج.م / شهر";
     }
 
-    // إرسال طلب جديد
-    async function submitOrder(e) {
+    // حفظ عملية تقسيط وعميل جديد
+    async function saveCustomerAndOrder(e) {
       e.preventDefault();
-      const btn = document.getElementById("btnSubmitOrder");
+      const btn = document.getElementById("btnSaveOrder");
       btn.disabled = true;
-      btn.innerText = "جاري إرسال الطلب...";
+      btn.innerText = "جاري الحفظ...";
 
-      const name = document.getElementById("custName").value;
-      const phone = document.getElementById("custPhone").value;
-      const whatsapp = document.getElementById("custWhatsapp").value;
-      const village = document.getElementById("custVillage").value;
-      const product = document.getElementById("custProduct").value;
-      const cardUrl = document.getElementById("custCardUrl").value;
+      const cash = parseFloat(document.getElementById("pCash").value) || 0;
+      const down = parseFloat(document.getElementById("pDown").value) || 0;
+      const months = parseInt(document.getElementById("pMonths").value) || 6;
+      let rate = 0.15;
+      if (months === 4) rate = 0.07;
+      if (months === 12) rate = 0.25;
+
+      const totalInstallment = Math.round(cash * (1 + rate));
+      const remaining = Math.max(0, totalInstallment - down);
+      const monthly = Math.round(remaining / months);
 
       try {
-        // 1. تسجيل العميل أولاً
+        // 1. حفظ العميل
         const resCust = await fetch(API_URL, {
           method: "POST",
           body: JSON.stringify({
             action: "addCustomer",
-            name: name,
-            phone: phone,
-            whatsapp: whatsapp,
-            village: village,
-            address: village,
-            idCardUrl: cardUrl
+            name: document.getElementById("cName").value,
+            phone: document.getElementById("cPhone").value,
+            whatsapp: document.getElementById("cWhatsapp").value,
+            village: document.getElementById("cVillage").value,
+            address: document.getElementById("cVillage").value,
+            idCardUrl: document.getElementById("cCardUrl").value
           })
         });
         const custData = await resCust.json();
 
-        // 2. تسجيل طلب التقسيط
-        const total = parseFloat(document.getElementById("calcTotalPrice").value) || 0;
-        const down = parseFloat(document.getElementById("calcDownPayment").value) || 0;
-        const months = parseInt(document.getElementById("calcMonths").value) || 6;
-        const remaining = total - down;
-        const monthly = Math.round(remaining / months);
-
+        // 2. حفظ الطلب
         await fetch(API_URL, {
           method: "POST",
           body: JSON.stringify({
             action: "createInstallmentOrder",
             customerId: custData.customerId || "CUST-NEW",
-            customerName: name,
-            phone: phone,
-            productName: product,
-            totalPrice: total,
+            customerName: document.getElementById("cName").value,
+            phone: document.getElementById("cPhone").value,
+            category: document.getElementById("pCategory").value,
+            productName: document.getElementById("pName").value,
+            cashPrice: cash,
+            installmentPrice: totalInstallment,
             downPayment: down,
             remainingAmount: remaining,
-            installmentCount: months,
+            monthsCount: months,
             monthlyAmount: monthly,
+            ratePercent: (rate * 100) + "%",
             startDate: new Date().toISOString().split('T')[0]
           })
         });
 
-        showToast("تم إرسال طلبك بنجاح! سيتواصل معك أ/ غانم قريباً.");
-        document.getElementById("orderForm").reset();
+        alert("تم حفظ عملية التقسيط بنجاح!");
+        location.reload();
       } catch (err) {
-        showToast("حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً.");
+        alert("حدث خطأ أثناء الحفظ.");
       } finally {
         btn.disabled = false;
-        btn.innerText = "إرسال الطلب إلى أ/ غانم";
       }
     }
 
-    // تحميل بيانات الآدمن
-    async function loadAdminData() {
-      try {
-        const resCust = await fetch(API_URL + "?action=getCustomers");
-        const customers = await resCust.json();
-        renderCustomers(customers);
-
-        const resOrders = await fetch(API_URL + "?action=getOrders");
-        const orders = await resOrders.json();
-        renderOrders(orders);
-      } catch (e) {
-        console.error("Error loading admin data:", e);
-      }
+    // التنقل بين الشاشات
+    function showSection(sec) {
+      ['installments', 'suppliers', 'finance', 'admin'].forEach(s => {
+        document.getElementById(`sec-${s}`)?.classList.add("hidden");
+        document.getElementById(`nav-${s}`)?.classList.remove("active-nav");
+      });
+      document.getElementById(`sec-${sec}`)?.classList.remove("hidden");
+      document.getElementById(`nav-${sec}`)?.classList.add("active-nav");
     }
 
-    // عرض جدول العملاء
-    function renderCustomers(data) {
-      const tbody = document.getElementById("customersTableBody");
-      if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">لا يوجد عملاء مسجلون حالياً</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = data.map(c => `
-        <tr class="border-b hover:bg-gray-50">
-          <td class="p-3 font-bold text-gray-800">${c.Name || '-'}</td>
-          <td class="p-3">${c.Village || '-'}</td>
-          <td class="p-3 text-blue-600 font-mono">${c.WhatsApp || '-'}</td>
-          <td class="p-3">
-            <span class="px-2 py-1 rounded text-xs font-bold ${c.Rating === 'متأخر' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
-              ${c.Rating || 'منتظم'}
-            </span>
-          </td>
-          <td class="p-3">
-            <span class="px-2 py-1 rounded text-xs font-bold ${c.Status === 'محظور' ? 'bg-black text-white' : 'bg-blue-100 text-blue-800'}">
-              ${c.Status || 'نشط'}
-            </span>
-          </td>
-          <td class="p-3 text-center space-x-1 space-x-reverse">
-            <button onclick="updateCustomer('${c.CustomerID}', '${c.Rating === 'متأخر' ? 'منتظم' : 'متأخر'}', '${c.Status}')" class="text-xs bg-yellow-500 text-white px-2 py-1 rounded">تغيير التصنيف</button>
-            <button onclick="updateCustomer('${c.CustomerID}', '${c.Rating}', '${c.Status === 'محظور' ? 'نشط' : 'محظور'}')" class="text-xs ${c.Status === 'محظور' ? 'bg-green-600' : 'bg-red-600'} text-white px-2 py-1 rounded">
-              ${c.Status === 'محظور' ? 'فك الحظر' : 'حظر العميل'}
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    // عرض جدول الطلبات
-    function renderOrders(data) {
-      const tbody = document.getElementById("ordersTableBody");
-      if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">لا توجد طلبات تقسيط حتى الآن</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = data.map(o => `
-        <tr class="border-b hover:bg-gray-50">
-          <td class="p-3 font-bold">${o.CustomerName || '-'}</td>
-          <td class="p-3 text-blue-900 font-semibold">${o.ProductName || '-'}</td>
-          <td class="p-3">${(o.TotalPrice || 0).toLocaleString()} ج.م</td>
-          <td class="p-3 text-green-700">${(o.DownPayment || 0).toLocaleString()} ج.م</td>
-          <td class="p-3 font-bold text-blue-700">${(o.MonthlyAmount || 0).toLocaleString()} ج.م</td>
-          <td class="p-3 text-center">
-            <button onclick="sendWhatsappReminder('${o.Phone}', '${o.CustomerName}', '${o.ProductName}', '${o.MonthlyAmount}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center justify-center space-x-1 space-x-reverse mx-auto">
-              <i class="fa-brands fa-whatsapp"></i>
-              <span>إرسال تذكير</span>
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    // تحديث حالة العميل (تصنيف أو حظر)
-    async function updateCustomer(id, rating, status) {
-      try {
-        await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "updateCustomerStatus",
-            customerId: id,
-            rating: rating,
-            status: status
-          })
-        });
-        showToast("تم تحديث حالة العميل بنجاح");
-        loadAdminData();
-      } catch (e) {
-        showToast("خطأ أثناء التحديث");
-      }
-    }
-
-    // إرسال تذكير عبر الواتساب
-    function sendWhatsappReminder(phone, name, product, amount) {
-      let cleanPhone = phone.replace(/[^0-9]/g, '');
-      if (cleanPhone.startsWith('0')) {
-        cleanPhone = '2' + cleanPhone; // إضافة كود مصر
-      }
-      const message = `أهلاً بك أ/ ${name}، نذكركم بموعد قسط جهاز (${product}) بقيمة ${amount} ج.م مع غانم ستور (ديروط). شاكرين تعاملكم معنا.`;
-      const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-      window.open(url, '_blank');
-    }
-
-    // إظهار التنبيهات
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      document.getElementById("toastMessage").innerText = msg;
-      toast.classList.remove("hidden");
-      setTimeout(() => toast.classList.add("hidden"), 4000);
+    function logout() {
+      location.reload();
     }
   </script>
 </body>
