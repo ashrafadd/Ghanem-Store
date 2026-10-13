@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ghanem Store | برنامج إدارة المبيعات والأقساط</title>
+  <title>Ghanem Store | نظام إدارة المبيعات والأقساط وكشوف الحسابات</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,6 +13,12 @@
   <style>
     body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
     .active-nav { background-color: #1e3a8a !important; color: #ffffff !important; }
+    @media print {
+      body * { visibility: hidden; }
+      #printableArea, #printableArea * { visibility: visible; }
+      #printableArea { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body class="text-gray-800 antialiased">
@@ -46,7 +52,7 @@
   <!-- MAIN APP WRAPPER -->
   <div id="appScreen" class="hidden min-h-screen pb-12">
     <!-- Header -->
-    <header class="bg-blue-900 text-white shadow-md sticky top-0 z-40">
+    <header class="bg-blue-900 text-white shadow-md sticky top-0 z-40 no-print">
       <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center space-x-3 space-x-reverse">
           <span class="bg-yellow-500 text-blue-950 font-extrabold px-3 py-1 rounded-lg text-sm">Ghanem Store</span>
@@ -59,7 +65,7 @@
     </header>
 
     <!-- Navigation Tabs -->
-    <div class="max-w-7xl mx-auto px-4 mt-4">
+    <div class="max-w-7xl mx-auto px-4 mt-4 no-print">
       <div class="bg-white p-2 rounded-2xl shadow-sm flex flex-wrap gap-2 text-sm font-bold border border-gray-100">
         <button onclick="showSection('installments')" id="nav-installments" class="active-nav px-4 py-2.5 rounded-xl flex items-center gap-2 transition">
           <i class="fa-solid fa-calculator"></i> الأقساط والبيع
@@ -74,7 +80,7 @@
           <i class="fa-solid fa-chart-line"></i> الخزينة والأرباح
         </button>
         <button id="nav-admin" onclick="showSection('admin')" class="px-4 py-2.5 rounded-xl flex items-center gap-2 text-gray-600 transition hidden">
-          <i class="fa-solid fa-user-shield"></i> لوحة الأدمن واسترجاع المحذوفات
+          <i class="fa-solid fa-user-shield"></i> لوحة الأدمن
         </button>
       </div>
     </div>
@@ -84,7 +90,6 @@
 
       <!-- SECTION 1: INSTALLMENTS & SALE -->
       <section id="sec-installments" class="space-y-6">
-        
         <!-- OCR Scanner -->
         <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-2xl p-5 shadow-md flex flex-wrap justify-between items-center gap-4">
           <div>
@@ -130,7 +135,6 @@
               </div>
             </div>
 
-            <!-- Categories -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-blue-50/60 p-4 rounded-xl border border-blue-100">
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">تصنيف الجهاز</label>
@@ -158,7 +162,6 @@
               </div>
             </div>
 
-            <!-- Islamic Calculator -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl border">
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">مدة التقسيط المرنة</label>
@@ -190,134 +193,178 @@
         </div>
       </section>
 
-      <!-- SECTION 2: CUSTOMERS & MULTI-CONTRACT DETAILS -->
+      <!-- SECTION 2: ADVANCED CUSTOMERS & LEDGER (إعادة هيكلة كشف العملاء والأجهزة) -->
       <section id="sec-customers" class="hidden space-y-6">
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-          <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
-            <h3 class="text-lg font-bold text-blue-900 flex items-center gap-2">
-              <i class="fa-solid fa-users text-blue-600"></i>
-              سجل العملاء والعقود المدمجة
-            </h3>
-            <div class="flex items-center gap-2 w-full md:w-auto">
-              <input type="text" id="custSearchInput" onkeyup="filterCustomersList()" placeholder="بحث باسم العميل أو الهاتف أو القرية..." class="bg-gray-50 border p-2 rounded-xl text-xs w-full md:w-64 outline-none">
-              <button onclick="loadCustomersSectionData()" class="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-xl text-xs font-bold text-blue-900">
-                <i class="fa-solid fa-rotate"></i>
+          
+          <!-- Filter & Search Bar -->
+          <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 mb-6 space-y-3">
+            <div class="flex flex-wrap justify-between items-center gap-3">
+              <h3 class="text-lg font-bold text-blue-900 flex items-center gap-2">
+                <i class="fa-solid fa-users text-blue-600"></i>
+                سجل كشف العملاء المتقدم وعقود الأجهزة
+              </h3>
+              <button onclick="loadCustomersSectionData()" class="bg-white hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-1 shadow-sm">
+                <i class="fa-solid fa-rotate"></i> تحديث البيانات
               </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-gray-600 mb-1">بحث شامل بالعميل</label>
+                <input type="text" id="custSearchInput" onkeyup="filterCustomersList()" placeholder="اسم العميل / الهاتف / القرية / الرقم القومي..." class="bg-white border p-2 rounded-xl text-xs w-full outline-none focus:ring-2 focus:ring-blue-600">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-gray-600 mb-1">تصفية حسب حالة السداد</label>
+                <select id="custStatusFilter" onchange="filterCustomersList()" class="bg-white border p-2 rounded-xl text-xs w-full outline-none">
+                  <option value="all">كافة العملاء والعقود</option>
+
+                  <option value="active">عقود جارية السداد فقط</option>
+                  <option value="completed">عقود مكتملة السداد</option>
+                  <option value="late">عملاء متأخرون عن السداد</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-gray-600 mb-1">من تاريخ (بداية العقد)</label>
+                <input type="date" id="custStartDateFilter" onchange="filterCustomersList()" class="bg-white border p-2 rounded-xl text-xs w-full outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-gray-600 mb-1">إلى تاريخ</label>
+                <input type="date" id="custEndDateFilter" onchange="filterCustomersList()" class="bg-white border p-2 rounded-xl text-xs w-full outline-none">
+              </div>
             </div>
           </div>
 
+          <!-- Main Customer Grid -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Customers List -->
-            <div class="bg-gray-50 p-4 rounded-xl border max-h-[500px] overflow-y-auto space-y-2" id="customersListNav">
+            <!-- Left Customer Sidebar List -->
+            <div class="bg-gray-50 p-4 rounded-2xl border max-h-[600px] overflow-y-auto space-y-2" id="customersListNav">
               <p class="text-xs text-gray-400 text-center py-4">جاري تحميل قائمة العملاء...</p>
             </div>
 
-            <!-- Customer Detail Card -->
-            <div class="md:col-span-2 bg-white p-5 rounded-2xl border border-gray-200 space-y-4" id="customerDetailView">
-              <p class="text-sm text-gray-400 text-center py-10">اختر عميلاً من القائمة الجانبية لمعاينة تفاصيل أجهزته والأقساط المدمجة</p>
+            <!-- Right Detailed Customer Card & Ledger -->
+            <div class="md:col-span-2 bg-white p-5 rounded-2xl border border-gray-200 space-y-5" id="customerDetailView">
+              <p class="text-sm text-gray-400 text-center py-16">اختر عميلاً من القائمة الجانبية لمعاينة كشف حسابه التفصيلي وطباعة التقرير الرسمى</p>
             </div>
           </div>
+
         </div>
       </section>
 
-      <!-- SECTION 3: SUPPLIERS & PURCHASES -->
+      <!-- SECTION 3: SUPPLIERS & PURCHASES (إعادة هيكلة المشتريات والتجار) -->
       <section id="sec-suppliers" class="hidden space-y-6">
         
-        <!-- Total Supplier Debt Header -->
-        <div class="bg-blue-900 text-white rounded-2xl p-4 shadow-sm flex justify-between items-center">
-          <span class="text-xs font-bold"><i class="fa-solid fa-coins text-yellow-400 ml-1"></i> إجمالي الديون المستحقة لكافة التجار:</span>
-          <span id="supTotalDebtHeader" class="text-lg font-black text-yellow-400">0 ج.م</span>
+        <!-- Summary Cards Header -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-blue-900 text-white rounded-2xl p-4 shadow-sm flex justify-between items-center">
+            <div>
+              <span class="text-xs text-blue-200 font-bold block">إجمالي ديون التجار المستحقة:</span>
+              <span id="supTotalDebtHeader" class="text-xl font-black text-yellow-400">0 ج.م</span>
+            </div>
+            <i class="fa-solid fa-coins text-3xl text-yellow-400/50"></i>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border shadow-sm flex justify-between items-center">
+            <div>
+              <span class="text-xs text-gray-500 font-bold block">إجمالي مشتريات البضائع:</span>
+              <span id="supTotalPurchasesHeader" class="text-xl font-black text-blue-900">0 ج.م</span>
+            </div>
+            <i class="fa-solid fa-boxes-packing text-3xl text-blue-900/30"></i>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border shadow-sm flex justify-between items-center">
+            <div>
+              <span class="text-xs text-gray-500 font-bold block">إجمالي المدفوعات للتجار:</span>
+              <span id="supTotalPaidHeader" class="text-xl font-black text-green-600">0 ج.م</span>
+            </div>
+            <i class="fa-solid fa-receipt text-3xl text-green-600/30"></i>
+          </div>
         </div>
 
+        <!-- Supplier Sub-Tabs Navigation -->
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-          <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-boxes-packing text-blue-600"></i>
-            تسجيل فاتورة شراء أجهزة من كبار التجار
-          </h3>
-          <form id="purchaseForm" onsubmit="savePurchase(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">اسم التاجر الرئيسي *</label>
-              <input type="text" id="supName" placeholder="تاجر الجملة بأسيوط" required class="w-full bg-gray-50 border p-2.5 rounded-xl text-sm outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">اسم الجهاز / الصنف المشترى *</label>
-              <input type="text" id="purItem" placeholder="5 ثلاجات توشيبا" required class="w-full bg-gray-50 border p-2.5 rounded-xl text-sm outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">رقم السيريال / IMEI (إن وجد)</label>
-              <input type="text" id="purSerial" placeholder="3569821045" class="w-full bg-gray-50 border p-2.5 rounded-xl text-sm outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">السعر الإجمالي (ج.م) *</label>
-              <input type="number" id="purTotal" placeholder="50000" required class="w-full bg-gray-50 border p-2.5 rounded-xl text-sm outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">المبلغ المدفوع كاش (ج.م) *</label>
-              <input type="number" id="purPaid" placeholder="20000" required class="w-full bg-gray-50 border p-2.5 rounded-xl text-sm outline-none">
-            </div>
-            <div class="flex items-end">
-              <button type="submit" id="btnSavePurchase" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-2.5 rounded-xl transition shadow">
-                حفظ الشراء وتخصيم الحساب
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Suppliers List & Statement -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="bg-white rounded-2xl p-6 border shadow-sm md:col-span-1 space-y-4">
-            <h4 class="font-bold text-blue-900 text-md flex items-center justify-between">
-              <span><i class="fa-solid fa-users-between-lines ml-1"></i> التجار المضافون</span>
-              <button onclick="loadSuppliersData()" class="text-xs bg-gray-100 p-1.5 rounded-lg text-blue-700"><i class="fa-solid fa-rotate"></i></button>
-            </h4>
-            <div id="suppliersList" class="space-y-2 max-h-80 overflow-y-auto">
-              <p class="text-xs text-gray-400 text-center py-4">جاري تحميل القائمة...</p>
-            </div>
+          <div class="flex border-b mb-6 gap-4 text-sm font-bold">
+            <button onclick="switchSupplierSubTab('invoices')" id="subnav-invoices" class="pb-3 border-b-2 border-blue-900 text-blue-900 flex items-center gap-2">
+              <i class="fa-solid fa-file-invoice-dollar"></i> تسجيل فاتورة شراء أجهزة
+            </button>
+            <button onclick="switchSupplierSubTab('ledger')" id="subnav-ledger" class="pb-3 text-gray-500 hover:text-blue-900 flex items-center gap-2">
+              <i class="fa-solid fa-book-bookmark"></i> كشف حساب وتصفية التجار
+            </button>
           </div>
 
-          <div class="bg-white rounded-2xl p-6 border shadow-sm md:col-span-2 space-y-4">
-            <h4 class="font-bold text-blue-900 text-md flex items-center gap-2">
-              <i class="fa-solid fa-receipt text-green-600"></i>
-              تصفية حساب تاجر وسداد دفعة
-            </h4>
-
-            <form id="paySupForm" onsubmit="paySupplierDebt(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-green-50/50 p-4 rounded-xl border border-green-100">
-              <input type="hidden" id="selectedSupId">
+          <!-- Sub-Tab 1: Add Purchase Invoice -->
+          <div id="subtab-invoices" class="space-y-6">
+            <form id="purchaseForm" onsubmit="savePurchase(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-5 rounded-2xl border">
               <div>
-                <label class="block text-xs font-bold text-gray-600 mb-1">التاجر المحدد</label>
-                <input type="text" id="selectedSupName" readonly placeholder="اختر تاجرًا من القائمة" class="w-full bg-gray-100 border p-2 rounded-xl text-xs font-bold">
+                <label class="block text-xs font-bold text-gray-600 mb-1">اسم التاجر الرئيسي *</label>
+                <input type="text" id="supName" placeholder="تاجر الجملة بأسيوط" required class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-600 mb-1">مبلغ الدفعة المدفوعة (ج.م)</label>
-                <input type="number" id="supPayAmount" required placeholder="5000" class="w-full bg-white border p-2 rounded-xl text-xs outline-none">
+                <label class="block text-xs font-bold text-gray-600 mb-1">اسم الجهاز / الصنف المشترى *</label>
+                <input type="text" id="purItem" placeholder="5 ثلاجات توشيبا" required class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">رقم السيريال / IMEI (إن وجد)</label>
+                <input type="text" id="purSerial" placeholder="3569821045" class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">السعر الإجمالي بالفاتورة (ج.م) *</label>
+                <input type="number" id="purTotal" placeholder="50000" required class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">المبلغ المدفوع كاش (ج.م) *</label>
+                <input type="number" id="purPaid" placeholder="20000" required class="w-full bg-white border p-2.5 rounded-xl text-sm outline-none">
               </div>
               <div class="flex items-end">
-                <button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold p-2 rounded-xl text-xs transition">
-                  خصم الدفعة وتصفية الحساب
+                <button type="submit" id="btnSavePurchase" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-2.5 rounded-xl transition shadow flex justify-center items-center gap-2">
+                  <i class="fa-solid fa-floppy-disk"></i> حفظ الشراء وتخصيم الحساب
                 </button>
               </div>
             </form>
 
-            <h5 class="font-bold text-xs text-gray-600 mt-2">كشف المشتريات للتاجر المحدد:</h5>
-            <div class="overflow-x-auto max-h-60 overflow-y-auto">
+            <h4 class="font-bold text-md text-blue-900">سجل فواتير المشتريات العامة:</h4>
+            <div class="overflow-x-auto max-h-80 overflow-y-auto border rounded-xl">
               <table class="w-full text-right text-xs">
-                <thead class="bg-gray-100 text-gray-700 font-bold">
+                <thead class="bg-blue-900 text-white font-bold">
                   <tr>
-                    <th class="p-2">الصنف</th>
-                    <th class="p-2">الإجمالي</th>
-                    <th class="p-2">المدفوع</th>
-                    <th class="p-2">المتبقي</th>
-                    <th class="p-2">التاريخ</th>
+                    <th class="p-3">اسم التاجر</th>
+                    <th class="p-3">الصنف / الجهاز</th>
+                    <th class="p-3">السيريال / IMEI</th>
+                    <th class="p-3">الإجمالي</th>
+                    <th class="p-3">المدفوع</th>
+                    <th class="p-3">المتبقي</th>
+                    <th class="p-3">التاريخ</th>
                   </tr>
                 </thead>
-                <tbody id="supplierLedgerBody">
-                  <tr><td colspan="5" class="p-3 text-center text-gray-400">اختر تاجرًا من القائمة المعروضة لعرض حسابه</td></tr>
+                <tbody id="globalPurchasesTableBody">
+                  <tr><td colspan="7" class="p-4 text-center text-gray-400">جاري تحميل الفواتير...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
-        </div>
 
+          <!-- Sub-Tab 2: Supplier Ledger Account -->
+          <div id="subtab-ledger" class="hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              <!-- Left Suppliers List -->
+              <div class="bg-gray-50 rounded-2xl p-4 border shadow-sm md:col-span-1 space-y-3 max-h-[500px] overflow-y-auto">
+                <h4 class="font-bold text-blue-900 text-xs flex items-center justify-between">
+                  <span><i class="fa-solid fa-users-between-lines ml-1"></i> قائمة التجار المضافين</span>
+                  <button onclick="loadSuppliersData()" class="text-xs bg-white p-1 rounded-lg text-blue-700 border"><i class="fa-solid fa-rotate"></i></button>
+                </h4>
+                <div id="suppliersList" class="space-y-2">
+                  <p class="text-xs text-gray-400 text-center py-4">جاري تحميل القائمة...</p>
+                </div>
+              </div>
+
+              <!-- Right Supplier Details & Payment Form -->
+              <div class="bg-white rounded-2xl p-5 border shadow-sm md:col-span-2 space-y-4" id="supplierDetailView">
+                <p class="text-xs text-gray-400 text-center py-16">اختر تاجرًا من القائمة الجانبية لمعاينة دفتر أستاذه، وتصفية حسابه، وطباعة كشف الحساب</p>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
       </section>
 
       <!-- SECTION 4: TREASURY & PROFITS WITH MODALS -->
@@ -362,6 +409,57 @@
       </section>
 
     </main>
+  </div>
+
+  <!-- PRINTABLE STATEMENT MODAL (قالب طباعة كشف الحساب الموحد للعميل والتاجر) -->
+  <div id="printModal" class="fixed inset-0 bg-black/70 hidden justify-center items-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3 no-print">
+        <h4 class="font-bold text-blue-900 text-md flex items-center gap-2">
+          <i class="fa-solid fa-print text-yellow-500"></i> معاينة وطباعة كشف الحساب الرسمى
+        </h4>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow">
+            <i class="fa-solid fa-print"></i> طباعة / حفظ كـ PDF
+          </button>
+          <button onclick="closePrintModal()" class="text-gray-400 hover:text-black font-bold text-xl px-2">&times;</button>
+        </div>
+      </div>
+
+      <!-- Printable Area Content -->
+      <div id="printableArea" class="bg-white p-6 space-y-6 border rounded-xl text-right">
+        <!-- Header -->
+        <div class="flex justify-between items-center border-b-2 border-blue-900 pb-4">
+          <div>
+            <h2 class="text-2xl font-black text-blue-900">معرض غانم ستور (Ghanem Store)</h2>
+            <p class="text-xs text-gray-600 mt-1">لتجارة الأجهزة الكهربائية والإلكترونيات والهواتف الذكية</p>
+            <p class="text-xs text-gray-500">العنوان: أسيوط - ديروط | هاتف: 01000000000</p>
+          </div>
+          <div class="text-left">
+            <span class="bg-yellow-500 text-blue-950 font-black px-4 py-2 rounded-xl text-lg block shadow-sm">كشف حساب رسمي</span>
+            <span class="text-[11px] text-gray-400 mt-1 block" id="printReportDate">التاريخ: --</span>
+          </div>
+        </div>
+
+        <!-- Target Info -->
+        <div id="printTargetHeader" class="bg-gray-50 p-4 rounded-xl border text-xs grid grid-cols-2 gap-2"></div>
+
+        <!-- Table Data -->
+        <div id="printTableContainer" class="space-y-4"></div>
+
+        <!-- Footer Signatures -->
+        <div class="pt-8 grid grid-cols-2 text-center text-xs font-bold text-gray-700 border-t mt-8">
+          <div>
+            <p>توقيع / ختـم الإدارة</p>
+            <p class="mt-8 text-blue-900">م/ أشرف الديب</p>
+          </div>
+          <div>
+            <p>توقيع العميل / التاجر بالموافقة</p>
+            <p class="mt-8 text-gray-400">..............................</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- PAY INSTALLMENT MODAL -->
@@ -438,7 +536,7 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzXQcRID27rFL18HRj4v7_n-L_JURBrKGzIHC_Tnq0mpJa0TlwykeBbc3d9tBHmXCg/exec";
     let currentUser = null;
-    let allCustomers = [], allOrders = [], allSuppliers = [], allPurchases = [];
+    let allCustomers = [], allOrders = [], allSuppliers = [], allPurchases = [], allPayments = [], allSupplierPayments = [];
 
     async function handleLogin(e) {
       e.preventDefault();
@@ -484,18 +582,23 @@
 
     async function loadAllData() {
       try {
-        const [resC, resO, resS, resP] = await Promise.all([
+        const [resC, resO, resS, resP, resPay, resSPay] = await Promise.all([
           fetch(API_URL + "?action=getCustomers"),
           fetch(API_URL + "?action=getOrders"),
           fetch(API_URL + "?action=getSuppliers"),
-          fetch(API_URL + "?action=getPurchases")
+          fetch(API_URL + "?action=getPurchases"),
+          fetch(API_URL + "?action=getPayments"),
+          fetch(API_URL + "?action=getSupplierPayments")
         ]);
 
         if (resC.ok) allCustomers = await resC.json();
         if (resO.ok) allOrders = await resO.json();
         if (resS.ok) allSuppliers = await resS.json();
         if (resP.ok) allPurchases = await resP.json();
+        if (resPay.ok) allPayments = await resPay.json();
+        if (resSPay.ok) allSupplierPayments = await resSPay.json();
 
+        renderGlobalPurchasesTable(allPurchases);
         renderSuppliersList(allSuppliers);
         updateFinanceView();
       } catch (e) {
@@ -621,6 +724,175 @@
       }
     }
 
+    // CUSTOMERS SECTION FUNCTIONS
+    function filterCustomersList() {
+      const query = document.getElementById("custSearchInput").value.toLowerCase();
+      const statusFilter = document.getElementById("custStatusFilter").value;
+      const startDate = document.getElementById("custStartDateFilter").value;
+      const endDate = document.getElementById("custEndDateFilter").value;
+
+      const filtered = allCustomers.filter(function(c) {
+        const matchQuery = (c.Name || '').toLowerCase().indexOf(query) !== -1 ||
+                           (c.Phone || '').indexOf(query) !== -1 ||
+                           (c.Village || '').toLowerCase().indexOf(query) !== -1 ||
+                           (c.NationalID || '').indexOf(query) !== -1;
+
+        const custOrders = allOrders.filter(function(o) { return o.CustomerID === c.CustomerID; });
+        
+        let matchStatus = true;
+        if (statusFilter === 'active') {
+          matchStatus = custOrders.some(function(o) { return Number(o.RemainingAmount) > 0; });
+        } else if (statusFilter === 'completed') {
+          matchStatus = custOrders.length > 0 && custOrders.every(function(o) { return Number(o.RemainingAmount) === 0; });
+        } else if (statusFilter === 'late') {
+          matchStatus = c.Rating === 'متأخر' || custOrders.some(function(o) { return Number(o.RemainingAmount) > 0; });
+        }
+
+        let matchDate = true;
+        if (startDate || endDate) {
+          matchDate = custOrders.some(function(o) {
+            const oDate = o.StartDate || '';
+            if (startDate && oDate < startDate) return false;
+            if (endDate && oDate > endDate) return false;
+            return true;
+          });
+        }
+
+        return matchQuery && matchStatus && matchDate;
+      });
+
+      renderCustomersNavList(filtered);
+    }
+
+    function renderCustomersNavList(list) {
+      const box = document.getElementById("customersListNav");
+      if (!list || list.length === 0) {
+        box.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">لا يوجد عملاء مطابقون للبحث</p>';
+        return;
+      }
+
+      box.innerHTML = list.map(function(c) {
+        const custOrders = allOrders.filter(function(o) { return o.CustomerID === c.CustomerID; });
+        let totalRem = 0;
+        custOrders.forEach(function(o) { totalRem += Number(o.RemainingAmount) || 0; });
+
+        const villageStr = c.Village || '-';
+        const remBadge = totalRem > 0 ? '<span class="text-red-600 font-bold">' + totalRem.toLocaleString() + ' ج.م متبقي</span>' : '<span class="text-green-600 font-bold">مكتمل</span>';
+
+        return '<div onclick="selectCustomerDetail(\'' + c.CustomerID + '\')" class="p-3 bg-white border rounded-xl hover:bg-blue-50 cursor-pointer transition flex justify-between items-center">' +
+          '<div>' +
+            '<h5 class="font-bold text-xs text-gray-800">' + c.Name + '</h5>' +
+            '<span class="text-[10px] text-gray-500 block">' + villageStr + ' | ' + c.Phone + '</span>' +
+          '</div>' +
+          '<div class="text-left text-[10px]">' + remBadge + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function loadCustomersSectionData() {
+      renderCustomersNavList(allCustomers);
+    }
+
+    function selectCustomerDetail(id) {
+      const cust = allCustomers.find(function(c) { return c.CustomerID === id; });
+      const orders = allOrders.filter(function(o) { return o.CustomerID === id; });
+      const custPayments = allPayments.filter(function(p) { return p.CustomerID === id; });
+      const view = document.getElementById("customerDetailView");
+
+      if (!cust) return;
+
+      let totalSales = 0, totalPaid = 0, totalRemaining = 0, totalMonthlyCombo = 0;
+      orders.forEach(function(o) {
+        totalSales += Number(o.InstallmentPrice) || 0;
+        const rem = Number(o.RemainingAmount) || 0;
+        totalRemaining += rem;
+        if (rem > 0) totalMonthlyCombo += Number(o.MonthlyAmount) || 0;
+      });
+      totalPaid = totalSales - totalRemaining;
+
+      const ratingClass = cust.Rating === 'متأخر' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
+      const ratingText = cust.Rating || 'منتظم';
+      const natIdText = cust.NationalID || 'غير مسجلة';
+
+      let html = '<div class="border-b pb-3 flex justify-between items-center">' +
+        '<div>' +
+          '<h4 class="font-extrabold text-blue-900 text-lg">' + cust.Name + '</h4>' +
+          '<p class="text-xs text-gray-500">القرية: ' + cust.Village + ' | هاتف: ' + cust.Phone + ' | الرقم القومي: ' + natIdText + '</p>' +
+        '</div>' +
+        '<div class="flex items-center gap-2">' +
+          '<button onclick="openCustomerPrintStatement(\'' + cust.CustomerID + '\')" class="bg-blue-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow">' +
+            '<i class="fa-solid fa-print"></i> طباعة كشف حساب' +
+          '</button>' +
+          '<button onclick="shareCustomerWhatsApp(\'' + cust.Phone + '\', \'' + cust.Name + '\', ' + totalMonthlyCombo + ')" class="bg-green-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow">' +
+            '<i class="fa-brands fa-whatsapp"></i> واتساب' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+
+      '<!-- KPI Cards -->' +
+      '<div class="grid grid-cols-4 gap-3 text-center text-xs">' +
+        '<div class="bg-gray-50 p-3 rounded-xl border"><span class="text-gray-500 block text-[10px]">إجمالي العقود</span><span class="font-bold text-blue-900 text-sm">' + totalSales.toLocaleString() + ' ج.م</span></div>' +
+        '<div class="bg-green-50 p-3 rounded-xl border border-green-100"><span class="text-green-700 block text-[10px]">المسدد فعلياً</span><span class="font-bold text-green-700 text-sm">' + totalPaid.toLocaleString() + ' ج.م</span></div>' +
+        '<div class="bg-red-50 p-3 rounded-xl border border-red-100"><span class="text-red-700 block text-[10px]">المتبقي الكلي</span><span class="font-bold text-red-600 text-sm">' + totalRemaining.toLocaleString() + ' ج.م</span></div>' +
+        '<div class="bg-blue-900 text-white p-3 rounded-xl"><span class="text-blue-200 block text-[10px]">القسط المدمج</span><span class="font-black text-yellow-400 text-sm">' + totalMonthlyCombo.toLocaleString() + ' ج.م/شهر</span></div>' +
+      '</div>' +
+
+      '<h5 class="font-bold text-xs text-blue-900 mt-2"><i class="fa-solid fa-laptop-medical ml-1"></i> الأجهزة والعقود المسجلة للعميل:</h5>' +
+      '<div class="space-y-2 max-h-48 overflow-y-auto">';
+
+      html += orders.map(function(o) {
+        const monthly = Number(o.MonthlyAmount) || 0;
+        const rem = Number(o.RemainingAmount) || 0;
+        const prodName = o.ProductName || 'جهاز غير معرف';
+        const catName = o.Category || 'عام';
+
+        let btnPayHtml = rem > 0 ? 
+          '<button onclick="openPayModal(\'' + o.OrderID + '\', \'' + cust.CustomerID + '\', \'' + prodName + '\', ' + o.MonthlyAmount + ')" class="bg-green-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold shadow">تحصيل قسط</button>' :
+          '<span class="text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded border border-green-200">مكتمل</span>';
+
+        return '<div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center text-xs">' +
+          '<div>' +
+            '<span class="font-bold text-blue-900 block">' + prodName + ' (' + catName + ')</span>' +
+            '<span class="text-[10px] text-gray-500">بداية العقد: ' + (o.StartDate || '-') + ' | الإجمالي: ' + (Number(o.InstallmentPrice)||0).toLocaleString() + ' ج.م</span>' +
+          '</div>' +
+          '<div class="text-left space-y-1">' +
+            '<span class="font-bold text-green-700 block">' + monthly.toLocaleString() + ' ج.م / شهر</span>' +
+            '<span class="text-[10px] text-red-600 block">المتبقي: ' + rem.toLocaleString() + ' ج.م</span>' +
+            btnPayHtml +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      html += '</div>' +
+
+      '<!-- Payment History Ledger -->' +
+      '<h5 class="font-bold text-xs text-blue-900 mt-4"><i class="fa-solid fa-receipt ml-1"></i> سجل الأقساط والدفعات المحصلة:</h5>' +
+      '<div class="overflow-x-auto max-h-40 overflow-y-auto border rounded-xl">' +
+        '<table class="w-full text-right text-[11px]">' +
+          '<thead class="bg-gray-100 text-gray-700 font-bold"><tr><th class="p-2">التاريخ</th><th class="p-2">المبلغ المدفوع</th><th class="p-2">ملاحظات</th></tr></thead>' +
+          '<tbody>' +
+            (custPayments.length === 0 ? '<tr><td colspan="3" class="p-3 text-center text-gray-400">لا توجد عمليات تحصيل مسجلة لهذا العميل حتى الآن</td></tr>' :
+              custPayments.map(function(p) {
+                return '<tr class="border-b"><td class="p-2">' + (p.PaidDate || '').split('T')[0] + '</td><td class="p-2 font-bold text-green-600">' + (Number(p.AmountPaid)||0).toLocaleString() + ' ج.م</td><td class="p-2 text-gray-500">' + (p.Notes || '-') + '</td></tr>';
+              }).join('')) +
+          '</tbody>' +
+        '</table>' +
+      '</div>';
+
+      view.innerHTML = html;
+    }
+
+    // SUPPLIERS & PURCHASES FUNCTIONS
+    function switchSupplierSubTab(tab) {
+      document.getElementById('subtab-invoices').classList.add('hidden');
+      document.getElementById('subtab-ledger').classList.add('hidden');
+      document.getElementById('subnav-invoices').classList.remove('border-b-2', 'border-blue-900', 'text-blue-900');
+      document.getElementById('subnav-ledger').classList.remove('border-b-2', 'border-blue-900', 'text-blue-900');
+
+      document.getElementById('subtab-' + tab).classList.remove('hidden');
+      document.getElementById('subnav-' + tab).classList.add('border-b-2', 'border-blue-900', 'text-blue-900');
+    }
+
     async function savePurchase(e) {
       e.preventDefault();
       const btn = document.getElementById("btnSavePurchase");
@@ -650,6 +922,26 @@
       }
     }
 
+    function renderGlobalPurchasesTable(list) {
+      const tbody = document.getElementById("globalPurchasesTableBody");
+      if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-400">لا توجد فواتير مشتريات مسجلة</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(function(p) {
+        return '<tr class="border-b hover:bg-gray-50">' +
+          '<td class="p-3 font-bold text-blue-900">' + p.SupplierName + '</td>' +
+          '<td class="p-3">' + p.ItemName + '</td>' +
+          '<td class="p-3 font-mono text-gray-600">' + (p.SerialNo || '-') + '</td>' +
+          '<td class="p-3 font-bold">' + (Number(p.TotalPrice)||0).toLocaleString() + ' ج.م</td>' +
+          '<td class="p-3 text-green-600 font-bold">' + (Number(p.AmountPaid)||0).toLocaleString() + ' ج.م</td>' +
+          '<td class="p-3 text-red-600 font-bold">' + (Number(p.RemainingDebt)||0).toLocaleString() + ' ج.م</td>' +
+          '<td class="p-3 text-gray-400">' + (p.CreatedAt || '').split('T')[0] + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
     function renderSuppliersList(list) {
       const box = document.getElementById("suppliersList");
       if (!list || list.length === 0) {
@@ -659,43 +951,74 @@
 
       box.innerHTML = list.map(function(s) {
         const debt = Number(s.TotalDebt) || 0;
-        return '<div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center">' +
+        return '<div onclick="selectSupplierDetail(\'' + s.SupplierID + '\', \'' + s.SupplierName + '\')" class="p-3 bg-white border rounded-xl hover:bg-blue-50 cursor-pointer transition flex justify-between items-center">' +
           '<div>' +
             '<h5 class="font-bold text-xs text-gray-800">' + s.SupplierName + '</h5>' +
-            '<span class="text-[10px] text-gray-400 font-extrabold text-red-600">' + debt.toLocaleString() + ' ج.م</span>' +
+            '<span class="text-[10px] text-gray-400">' + (s.Phone || '-') + '</span>' +
           '</div>' +
-          '<button onclick="selectSupplier(\'' + s.SupplierID + '\', \'' + s.SupplierName + '\')" class="bg-blue-900 text-white px-2 py-1 rounded text-[10px] font-bold">' +
-            'تصفية / سداد' +
-          '</button>' +
+          '<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-100">' + debt.toLocaleString() + ' ج.م</span>' +
         '</div>';
       }).join('');
     }
 
-    function selectSupplier(id, name) {
-      document.getElementById("selectedSupId").value = id;
-      document.getElementById("selectedSupName").value = name;
+    function selectSupplierDetail(id, name) {
+      const sup = allSuppliers.find(function(s) { return s.SupplierID === id || s.SupplierName === name; });
+      const purchases = allPurchases.filter(function(p) { return p.SupplierName === name || p.SupplierID === id; });
+      const payments = allSupplierPayments.filter(function(sp) { return sp.SupplierName === name || sp.SupplierID === id; });
+      const view = document.getElementById("supplierDetailView");
 
-      const filteredP = allPurchases.filter(function(p) { return p.SupplierName === name || p.SupplierID === id; });
-      const tbody = document.getElementById("supplierLedgerBody");
+      const debt = Number(sup ? sup.TotalDebt : 0) || 0;
 
-      if (filteredP.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-3 text-center text-gray-400">لا توجد مشتريات لهذا التاجر</td></tr>';
-        return;
-      }
+      let html = '<div class="border-b pb-3 flex justify-between items-center">' +
+        '<div>' +
+          '<h4 class="font-extrabold text-blue-900 text-lg">' + name + '</h4>' +
+          '<p class="text-xs text-gray-500">هاتف التاجر: ' + (sup ? sup.Phone : '-') + '</p>' +
+        '</div>' +
+        '<div class="flex items-center gap-2">' +
+          '<button onclick="openSupplierPrintStatement(\'' + (sup ? sup.SupplierID : id) + '\', \'' + name + '\')" class="bg-blue-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow">' +
+            '<i class="fa-solid fa-print"></i> طباعة كشف حساب التاجر' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
 
-      tbody.innerHTML = filteredP.map(function(p) {
-        const total = Number(p.TotalPrice) || 0;
-        const paid = Number(p.AmountPaid) || 0;
-        const rem = Number(p.RemainingDebt) || 0;
-        const dateStr = (p.CreatedAt || '').split('T')[0];
-        return '<tr class="border-b">' +
-          '<td class="p-2 font-semibold">' + p.ItemName + '</td>' +
-          '<td class="p-2">' + total.toLocaleString() + ' ج.م</td>' +
-          '<td class="p-2 text-green-600">' + paid.toLocaleString() + ' ج.م</td>' +
-          '<td class="p-2 text-red-600">' + rem.toLocaleString() + ' ج.م</td>' +
-          '<td class="p-2 text-[10px] text-gray-400">' + dateStr + '</td>' +
-        '</tr>';
-      }).join('');
+      '<!-- Pay Supplier Debt Form -->' +
+      '<form onsubmit="paySupplierDebt(event)" class="grid grid-cols-3 gap-3 bg-green-50/60 p-4 rounded-xl border border-green-100">' +
+        '<input type="hidden" id="selectedSupId" value="' + (sup ? sup.SupplierID : id) + '">' +
+        '<input type="hidden" id="selectedSupName" value="' + name + '">' +
+        '<div><label class="block text-[10px] font-bold text-gray-600 mb-1">الرصيد المستحق عليه</label><input type="text" readonly value="' + debt.toLocaleString() + ' ج.م" class="w-full bg-gray-100 border p-2 rounded-xl text-xs font-bold text-red-600"></div>' +
+        '<div><label class="block text-[10px] font-bold text-gray-600 mb-1">مبلغ السداد المدفوع (ج.م)</label><input type="number" id="supPayAmount" required placeholder="5000" class="w-full bg-white border p-2 rounded-xl text-xs outline-none"></div>' +
+        '<div class="flex items-end"><button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold p-2 rounded-xl text-xs transition shadow">خصم السداد</button></div>' +
+      '</form>' +
+
+      '<!-- Supplier Purchases -->' +
+      '<h5 class="font-bold text-xs text-blue-900 mt-3"><i class="fa-solid fa-boxes-stacked ml-1"></i> كشف فواتير المشتريات من التاجر:</h5>' +
+      '<div class="overflow-x-auto max-h-40 overflow-y-auto border rounded-xl">' +
+        '<table class="w-full text-right text-[11px]">' +
+          '<thead class="bg-gray-100 font-bold"><tr><th class="p-2">الصنف</th><th class="p-2">السيريال</th><th class="p-2">الإجمالي</th><th class="p-2">المدفوع</th><th class="p-2">المتبقي</th></tr></thead>' +
+          '<tbody>' +
+            (purchases.length === 0 ? '<tr><td colspan="5" class="p-3 text-center text-gray-400">لا توجد مشتريات مسجلة</td></tr>' :
+              purchases.map(function(p) {
+                return '<tr class="border-b"><td class="p-2 font-semibold">' + p.ItemName + '</td><td class="p-2 text-gray-500">' + (p.SerialNo||'-') + '</td><td class="p-2">' + (Number(p.TotalPrice)||0).toLocaleString() + ' ج.م</td><td class="p-2 text-green-600">' + (Number(p.AmountPaid)||0).toLocaleString() + ' ج.م</td><td class="p-2 text-red-600 font-bold">' + (Number(p.RemainingDebt)||0).toLocaleString() + ' ج.م</td></tr>';
+              }).join('')) +
+          '</tbody>' +
+        '</table>' +
+      '</div>' +
+
+      '<!-- Supplier Payments History -->' +
+      '<h5 class="font-bold text-xs text-blue-900 mt-3"><i class="fa-solid fa-hand-holding-dollar ml-1"></i> كشف المدفوعات المسددة للتاجر:</h5>' +
+      '<div class="overflow-x-auto max-h-36 overflow-y-auto border rounded-xl">' +
+        '<table class="w-full text-right text-[11px]">' +
+          '<thead class="bg-gray-100 font-bold"><tr><th class="p-2">التاريخ</th><th class="p-2">المبلغ المدفوع</th><th class="p-2">ملاحظات</th></tr></thead>' +
+          '<tbody>' +
+            (payments.length === 0 ? '<tr><td colspan="3" class="p-3 text-center text-gray-400">لا توجد دفعات سداد مسجلة لهذا التاجر</td></tr>' :
+              payments.map(function(sp) {
+                return '<tr class="border-b"><td class="p-2">' + (sp.PaidAt || '').split('T')[0] + '</td><td class="p-2 font-bold text-green-600">' + (Number(sp.AmountPaid)||0).toLocaleString() + ' ج.م</td><td class="p-2 text-gray-500">' + (sp.Notes || '-') + '</td></tr>';
+              }).join('')) +
+          '</tbody>' +
+        '</table>' +
+      '</div>';
+
+      view.innerHTML = html;
     }
 
     async function paySupplierDebt(e) {
@@ -721,115 +1044,99 @@
         });
 
         alert("تم تسديد الدفعة وتصفية الحساب!");
-        document.getElementById("paySupForm").reset();
         loadAllData();
       } catch (err) {
         alert("حدث خطأ أثناء خصم السداد.");
       }
     }
 
-    function filterCustomersList() {
-      const query = document.getElementById("custSearchInput").value.toLowerCase();
-      const filtered = allCustomers.filter(function(c) { 
-        return (c.Name || '').toLowerCase().indexOf(query) !== -1 ||
-               (c.Phone || '').indexOf(query) !== -1 ||
-               (c.Village || '').toLowerCase().indexOf(query) !== -1;
-      });
-      renderCustomersNavList(filtered);
-    }
-
-    function renderCustomersNavList(list) {
-      const box = document.getElementById("customersListNav");
-      if (!list || list.length === 0) {
-        box.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">لا يوجد عملاء مطابقون للبحث</p>';
-        return;
-      }
-
-      box.innerHTML = list.map(function(c) {
-        const villageStr = c.Village || '-';
-        return '<div onclick="selectCustomerDetail(\'' + c.CustomerID + '\')" class="p-3 bg-white border rounded-xl hover:bg-blue-50 cursor-pointer transition">' +
-          '<h5 class="font-bold text-xs text-gray-800">' + c.Name + '</h5>' +
-          '<span class="text-[10px] text-gray-500 block">' + villageStr + ' | ' + c.Phone + '</span>' +
-        '</div>';
-      }).join('');
-    }
-
-    function loadCustomersSectionData() {
-      renderCustomersNavList(allCustomers);
-    }
-
-    function selectCustomerDetail(id) {
-      const cust = allCustomers.find(function(c) { return c.CustomerID === id; });
-      const orders = allOrders.filter(function(o) { return o.CustomerID === id; });
-      const view = document.getElementById("customerDetailView");
+    // PRINT MODAL FUNCTIONS
+    function openCustomerPrintStatement(custId) {
+      const cust = allCustomers.find(function(c) { return c.CustomerID === custId; });
+      const orders = allOrders.filter(function(o) { return o.CustomerID === custId; });
+      const payments = allPayments.filter(function(p) { return p.CustomerID === custId; });
 
       if (!cust) return;
 
-      let totalMonthlyCombo = 0;
-      let activeOrdersCount = 0;
-      orders.forEach(function(o) {
-        if (parseFloat(o.RemainingAmount) > 0) {
-          totalMonthlyCombo += parseFloat(o.MonthlyAmount) || 0;
-          activeOrdersCount++;
-        }
-      });
-
-      const ratingClass = cust.Rating === 'متأخر' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
-      const ratingText = cust.Rating || 'منتظم';
-      const natIdText = cust.NationalID || 'غير مسجلة';
-
-      let html = '<div class="border-b pb-3 flex justify-between items-center">' +
-        '<div>' +
-          '<h4 class="font-extrabold text-blue-900 text-md">' + cust.Name + '</h4>' +
-          '<p class="text-xs text-gray-500">' + cust.Village + ' | هاتف: ' + cust.Phone + ' | بطاقة: ' + natIdText + '</p>' +
-        '</div>' +
-        '<div class="flex items-center gap-2">' +
-          '<button onclick="shareCustomerWhatsApp(\'' + cust.Phone + '\', \'' + cust.Name + '\', ' + totalMonthlyCombo + ')" class="bg-green-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">' +
-            '<i class="fa-brands fa-whatsapp"></i> إرسال المدمج' +
-          '</button>' +
-          '<span class="px-3 py-1 rounded-full text-xs font-bold ' + ratingClass + '">' + ratingText + '</span>' +
-        '</div>' +
+      document.getElementById("printReportDate").innerText = "تاريخ التقرير: " + new Date().toISOString().split('T')[0];
+      
+      document.getElementById("printTargetHeader").innerHTML = '<div>' +
+        '<p class="font-bold text-blue-900">اسم العميل: ' + cust.Name + '</p>' +
+        '<p>القرية/العنوان: ' + cust.Village + '</p>' +
       '</div>' +
+      '<div>' +
+        '<p>رقم الهاتف: ' + cust.Phone + '</p>' +
+        '<p>الرقم القومي: ' + (cust.NationalID || 'غير مسجلة') + '</p>' +
+      '</div>';
 
-      '<div class="bg-blue-900 text-white p-4 rounded-xl shadow-md">' +
-        '<span class="text-xs text-blue-200 block">إجمالي القسط الشهري المدمج المطلوب حالياً:</span>' +
-        '<span class="text-2xl font-black text-yellow-400">' + totalMonthlyCombo.toLocaleString() + ' ج.م / شهرياً</span>' +
-        '<p class="text-[11px] text-blue-100 mt-1">يمتلك العميل (' + activeOrdersCount + ') عقود أقساط نشطة حالياً.</p>' +
+      let html = '<h5 class="font-bold text-xs text-blue-900">الأجهزة والأقساط المسجلة:</h5>' +
+      '<table class="w-full text-right text-xs border">' +
+        '<thead class="bg-gray-100 font-bold"><tr><th class="p-2 border">الجهاز</th><th class="p-2 border">الإجمالي</th><th class="p-2 border">المقدم</th><th class="p-2 border">المتبقي</th><th class="p-2 border">القسط الشهري</th></tr></thead>' +
+        '<tbody>' +
+          orders.map(function(o) {
+            return '<tr><td class="p-2 border font-bold">' + o.ProductName + '</td><td class="p-2 border">' + (Number(o.InstallmentPrice)||0).toLocaleString() + ' ج.م</td><td class="p-2 border">' + (Number(o.DownPayment)||0).toLocaleString() + ' ج.م</td><td class="p-2 border text-red-600 font-bold">' + (Number(o.RemainingAmount)||0).toLocaleString() + ' ج.م</td><td class="p-2 border text-green-700 font-bold">' + (Number(o.MonthlyAmount)||0).toLocaleString() + ' ج.م</td></tr>';
+          }).join('') +
+        '</tbody>' +
+      '</table>' +
+
+      '<h5 class="font-bold text-xs text-blue-900 mt-4">سجل كشف المدفوعات المسددة:</h5>' +
+      '<table class="w-full text-right text-xs border">' +
+        '<thead class="bg-gray-100 font-bold"><tr><th class="p-2 border">التاريخ</th><th class="p-2 border">المبلغ المدفوع</th><th class="p-2 border">ملاحظات</th></tr></thead>' +
+        '<tbody>' +
+          (payments.length === 0 ? '<tr><td colspan="3" class="p-2 text-center text-gray-400 border">لا توجد عمليات سداد مسجلة</td></tr>' :
+            payments.map(function(p) {
+              return '<tr><td class="p-2 border">' + (p.PaidDate||'').split('T')[0] + '</td><td class="p-2 border text-green-600 font-bold">' + (Number(p.AmountPaid)||0).toLocaleString() + ' ج.م</td><td class="p-2 border">' + (p.Notes||'-') + '</td></tr>';
+            }).join('')) +
+        '</tbody>' +
+      '</table>';
+
+      document.getElementById("printTableContainer").innerHTML = html;
+      document.getElementById("printModal").classList.remove("hidden");
+      document.getElementById("printModal").classList.add("flex");
+    }
+
+    function openSupplierPrintStatement(supId, supName) {
+      const purchases = allPurchases.filter(function(p) { return p.SupplierName === supName || p.SupplierID === supId; });
+      const payments = allSupplierPayments.filter(function(sp) { return sp.SupplierName === supName || sp.SupplierID === supId; });
+
+      document.getElementById("printReportDate").innerText = "تاريخ التقرير: " + new Date().toISOString().split('T')[0];
+
+      document.getElementById("printTargetHeader").innerHTML = '<div>' +
+        '<p class="font-bold text-blue-900">اسم التاجر: ' + supName + '</p>' +
       '</div>' +
+      '<div>' +
+        '<p>نوع التقرير: كشف حساب مشتريات وسداد تجار</p>' +
+      '</div>';
 
-      '<h5 class="font-bold text-xs text-gray-700 mt-3">الأجهزة والعقود المسجلة:</h5>' +
-      '<div class="space-y-2">';
+      let html = '<h5 class="font-bold text-xs text-blue-900">فواتير المشتريات والأجهزة:</h5>' +
+      '<table class="w-full text-right text-xs border">' +
+        '<thead class="bg-gray-100 font-bold"><tr><th class="p-2 border">الصنف / الجهاز</th><th class="p-2 border">السيريال/IMEI</th><th class="p-2 border">الإجمالي</th><th class="p-2 border">المدفوع</th><th class="p-2 border">المتبقي</th></tr></thead>' +
+        '<tbody>' +
+          purchases.map(function(p) {
+            return '<tr><td class="p-2 border font-bold">' + p.ItemName + '</td><td class="p-2 border font-mono">' + (p.SerialNo||'-') + '</td><td class="p-2 border">' + (Number(p.TotalPrice)||0).toLocaleString() + ' ج.م</td><td class="p-2 border text-green-600">' + (Number(p.AmountPaid)||0).toLocaleString() + ' ج.م</td><td class="p-2 border text-red-600 font-bold">' + (Number(p.RemainingDebt)||0).toLocaleString() + ' ج.م</td></tr>';
+          }).join('') +
+        '</tbody>' +
+      '</table>' +
 
-      html += orders.map(function(o) {
-        const monthly = Number(o.MonthlyAmount) || 0;
-        const rem = Number(o.RemainingAmount) || 0;
-        const prodName = o.ProductName || 'جهاز غير معرف';
-        const catName = o.Category || 'عام';
-        const startDateStr = o.StartDate || '-';
-        const monthsCnt = o.MonthsCount || 0;
+      '<h5 class="font-bold text-xs text-blue-900 mt-4">سجل الدفعات الخارجه للتاجر:</h5>' +
+      '<table class="w-full text-right text-xs border">' +
+        '<thead class="bg-gray-100 font-bold"><tr><th class="p-2 border">التاريخ</th><th class="p-2 border">المبلغ المدفوع</th><th class="p-2 border">ملاحظات</th></tr></thead>' +
+        '<tbody>' +
+          (payments.length === 0 ? '<tr><td colspan="3" class="p-2 text-center text-gray-400 border">لا توجد دفعات مسددة</td></tr>' :
+            payments.map(function(sp) {
+              return '<tr><td class="p-2 border">' + (sp.PaidAt||'').split('T')[0] + '</td><td class="p-2 border text-green-600 font-bold">' + (Number(sp.AmountPaid)||0).toLocaleString() + ' ج.م</td><td class="p-2 border">' + (sp.Notes||'-') + '</td></tr>';
+            }).join('')) +
+        '</tbody>' +
+      '</table>';
 
-        let btnPayHtml = '';
-        if (rem > 0) {
-          btnPayHtml = '<button onclick="openPayModal(\'' + o.OrderID + '\', \'' + cust.CustomerID + '\', \'' + prodName + '\', ' + o.MonthlyAmount + ')" class="bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold">تحصيل قسط</button>';
-        } else {
-          btnPayHtml = '<span class="text-green-600 font-bold">مكتمل</span>';
-        }
+      document.getElementById("printTableContainer").innerHTML = html;
+      document.getElementById("printModal").classList.remove("hidden");
+      document.getElementById("printModal").classList.add("flex");
+    }
 
-        return '<div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center text-xs">' +
-          '<div>' +
-            '<span class="font-bold text-blue-900 block">' + prodName + ' (' + catName + ')</span>' +
-            '<span class="text-[10px] text-gray-500">بداية العقد: ' + startDateStr + ' | المدة: ' + monthsCnt + ' أشهر</span>' +
-          '</div>' +
-          '<div class="text-left space-y-1">' +
-            '<span class="font-bold text-green-700 block">' + monthly.toLocaleString() + ' ج.م / شهر</span>' +
-            '<span class="text-[10px] text-red-600 block">المتبقي: ' + rem.toLocaleString() + ' ج.م</span>' +
-            btnPayHtml +
-          '</div>' +
-        '</div>';
-      }).join('');
-
-      html += '</div>';
-      view.innerHTML = html;
+    function closePrintModal() {
+      document.getElementById("printModal").classList.add("hidden");
+      document.getElementById("printModal").classList.remove("flex");
     }
 
     function openPayModal(orderId, custId, prodName, defaultAmt) {
@@ -904,8 +1211,13 @@
       document.getElementById("finLateAmount").innerText = totalPending.toLocaleString() + " ج.م";
 
       let totalSupDebt = allSuppliers.reduce(function(acc, s) { return acc + (Number(s.TotalDebt) || 0); }, 0);
+      let totalSupPurchases = allPurchases.reduce(function(acc, p) { return acc + (Number(p.TotalPrice) || 0); }, 0);
+      let totalSupPaid = allPurchases.reduce(function(acc, p) { return acc + (Number(p.AmountPaid) || 0); }, 0);
+
       document.getElementById("finSuppliersDebt").innerText = totalSupDebt.toLocaleString() + " ج.م";
       document.getElementById("supTotalDebtHeader").innerText = totalSupDebt.toLocaleString() + " ج.م";
+      document.getElementById("supTotalPurchasesHeader").innerText = totalSupPurchases.toLocaleString() + " ج.م";
+      document.getElementById("supTotalPaidHeader").innerText = totalSupPaid.toLocaleString() + " ج.م";
     }
 
     function openLateModal() {
