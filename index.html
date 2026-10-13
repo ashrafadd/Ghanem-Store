@@ -37,7 +37,7 @@
         </div>
         <button type="submit" id="btnLogin" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl transition shadow-lg flex justify-center items-center gap-2">
           <i class="fa-solid fa-right-to-bracket"></i>
-          <span>تسجيل الدخول</span>
+          <span id="loginBtnText">تسجيل الدخول</span>
         </button>
       </form>
     </div>
@@ -89,7 +89,7 @@
         <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-2xl p-5 shadow-md flex flex-wrap justify-between items-center gap-4">
           <div>
             <h4 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-id-card text-yellow-400"></i> القارئ الذكي لبطاقة الرقم القومي المصرية</h4>
-            <p class="text-xs text-blue-200 mt-1">صوّر البطاقة لاستخراج الاسم والرقْم القومي تلقائياً بآلية تدعم الأرقام الهندية والعربية</p>
+            <p class="text-xs text-blue-200 mt-1">صوّر البطاقة لاستخراج الاسم والرقم القومي تلقائياً بآلية تدعم الأرقام الهندية والعربية</p>
           </div>
           <div class="flex items-center gap-2">
             <input type="file" id="idCardCamera" accept="image/*" capture="environment" onchange="processIDCard(event)" class="hidden">
@@ -184,7 +184,7 @@
 
             <button type="submit" id="btnSaveOrder" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-md transition flex justify-center items-center gap-2">
               <i class="fa-solid fa-check-circle"></i>
-              <span>اعتماد العملية وحفظ العقد</span>
+              <span id="saveOrderBtnText">اعتماد العملية وحفظ العقد</span>
             </button>
           </form>
         </div>
@@ -440,12 +440,13 @@
     let currentUser = null;
     let allCustomers = [], allOrders = [], allSuppliers = [], allPurchases = [];
 
-    // تسجيل الدخول المباشر المضمون
+    // تسجيل الدخول المباشر والتنفيذي
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("btnLogin");
+      const btnText = document.getElementById("loginBtnText");
       btn.disabled = true;
-      btn.innerText = "جاري التحقق...";
+      btnText.innerText = "جاري التحقق...";
 
       const email = encodeURIComponent(document.getElementById("loginEmail").value.trim());
       const pass = encodeURIComponent(document.getElementById("loginPassword").value.trim());
@@ -454,6 +455,7 @@
 
       try {
         const res = await fetch(loginUrl);
+        if (!res.ok) throw new Error("شبكة الخادم غير مستجيبة");
         const data = await res.json();
 
         if (data.status === "success") {
@@ -477,7 +479,7 @@
         alert("حدث خطأ أثناء الاتصال. يرجى التأكد من اختيار New Version في Apps Script.");
       } finally {
         btn.disabled = false;
-        btn.innerText = "تسجيل الدخول";
+        btnText.innerText = "تسجيل الدخول";
       }
     }
 
@@ -490,10 +492,10 @@
           fetch(API_URL + "?action=getPurchases")
         ]);
 
-        allCustomers = await resC.json();
-        allOrders = await resO.json();
-        allSuppliers = await resS.json();
-        allPurchases = await resP.json();
+        if (resC.ok) allCustomers = await resC.json();
+        if (resO.ok) allOrders = await resO.json();
+        if (resS.ok) allSuppliers = await resS.json();
+        if (resP.ok) allPurchases = await resP.json();
 
         renderSuppliersList(allSuppliers);
         updateFinanceView();
@@ -516,7 +518,9 @@
           logger: m => { if (m.status === 'recognizing text') ocrText.innerText = `استخراج البيانات (${Math.round(m.progress * 100)}%)`; }
         });
 
-        const westernText = text.replace(/[٠١٢٣٤٥٦٧٨٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+        const arab = '٠١٢٣٤٥٦٧٨٩';
+        const lat = '0123456789';
+        const westernText = text.replace(/[٠-٩]/g, ch => lat[arab.indexOf(ch)] || ch);
         
         const idMatch = westernText.match(/\d{14}/);
         if (idMatch) {
@@ -566,8 +570,9 @@
     async function saveCustomerAndOrder(e) {
       e.preventDefault();
       const btn = document.getElementById("btnSaveOrder");
+      const btnText = document.getElementById("saveOrderBtnText");
       btn.disabled = true;
-      btn.innerText = "جاري الحفظ المباشر...";
+      btnText.innerText = "جاري الحفظ المباشر...";
 
       const cash = parseFloat(document.getElementById("pCash").value) || 0;
       const down = parseFloat(document.getElementById("pDown").value) || 0;
@@ -586,6 +591,7 @@
       try {
         await fetch(API_URL, {
           method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "saveOrderBatch",
             name: document.getElementById("cName").value,
@@ -612,7 +618,7 @@
         alert("حدث خطأ أثناء الحفظ.");
       } finally {
         btn.disabled = false;
-        btn.innerText = "اعتماد العملية وحفظ العقد";
+        btnText.innerText = "اعتماد العملية وحفظ العقد";
       }
     }
 
@@ -624,6 +630,7 @@
       try {
         await fetch(API_URL, {
           method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "addPurchase",
             supplierName: document.getElementById("supName").value,
@@ -651,17 +658,20 @@
         return;
       }
 
-      box.innerHTML = list.map(s => `
-        <div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center">
-          <div>
-            <h5 class="font-bold text-xs text-gray-800">${s.SupplierName}</h5>
-            <span class="text-[10px] text-gray-400 font-extrabold text-red-600">${(s.TotalDebt || 0).toLocaleString()} ج.م</span>
+      box.innerHTML = list.map(s => {
+        const debt = Number(s.TotalDebt) || 0;
+        return `
+          <div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center">
+            <div>
+              <h5 class="font-bold text-xs text-gray-800">${s.SupplierName}</h5>
+              <span class="text-[10px] text-gray-400 font-extrabold text-red-600">${debt.toLocaleString()} ج.م</span>
+            </div>
+            <button onclick="selectSupplier('${s.SupplierID}', '${s.SupplierName}')" class="bg-blue-900 text-white px-2 py-1 rounded text-[10px] font-bold">
+              تصفية / سداد
+            </button>
           </div>
-          <button onclick="selectSupplier('${s.SupplierID}', '${s.SupplierName}')" class="bg-blue-900 text-white px-2 py-1 rounded text-[10px] font-bold">
-            تصفية / سداد
-          </button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function selectSupplier(id, name) {
@@ -676,15 +686,20 @@
         return;
       }
 
-      tbody.innerHTML = filteredP.map(p => `
-        <tr class="border-b">
-          <td class="p-2 font-semibold">${p.ItemName}</td>
-          <td class="p-2">${(p.TotalPrice || 0).toLocaleString()} ج.م</td>
-          <td class="p-2 text-green-600">${(p.AmountPaid || 0).toLocaleString()} ج.م</td>
-          <td class="p-2 text-red-600">${(p.RemainingDebt || 0).toLocaleString()} ج.م</td>
-          <td class="p-2 text-[10px] text-gray-400">${(p.CreatedAt || '').split('T')[0]}</td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = filteredP.map(p => {
+        const total = Number(p.TotalPrice) || 0;
+        const paid = Number(p.AmountPaid) || 0;
+        const rem = Number(p.RemainingDebt) || 0;
+        return `
+          <tr class="border-b">
+            <td class="p-2 font-semibold">${p.ItemName}</td>
+            <td class="p-2">${total.toLocaleString()} ج.م</td>
+            <td class="p-2 text-green-600">${paid.toLocaleString()} ج.م</td>
+            <td class="p-2 text-red-600">${rem.toLocaleString()} ج.م</td>
+            <td class="p-2 text-[10px] text-gray-400">${(p.CreatedAt || '').split('T')[0]}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     async function paySupplierDebt(e) {
@@ -700,6 +715,7 @@
       try {
         await fetch(API_URL, {
           method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "paySupplier",
             supplierId: document.getElementById("selectedSupId").value,
@@ -785,23 +801,27 @@
 
         <h5 class="font-bold text-xs text-gray-700 mt-3">الأجهزة والعقود المسجلة:</h5>
         <div class="space-y-2">
-          ${orders.map(o => `
-            <div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center text-xs">
-              <div>
-                <span class="font-bold text-blue-900 block">${o.ProductName \vert{}\vert{} 'جهاز غير معرف'} (${o.Category || 'عام'})</span>
-                <span class="text-[10px] text-gray-500">بداية العقد: ${o.StartDate \vert{}\vert{} '-'} \vert{} المدة: ${o.MonthsCount || 0} أشهر</span>
+          ${orders.map(o => {
+            const monthly = Number(o.MonthlyAmount) || 0;
+            const rem = Number(o.RemainingAmount) || 0;
+            return `
+              <div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center text-xs">
+                <div>
+                  <span class="font-bold text-blue-900 block">${o.ProductName \vert{}\vert{} 'جهاز غير معرف'} (${o.Category || 'عام'})</span>
+                  <span class="text-[10px] text-gray-500">بداية العقد: ${o.StartDate \vert{}\vert{} '-'} \vert{} المدة: ${o.MonthsCount || 0} أشهر</span>
+                </div>
+                <div class="text-left space-y-1">
+                  <span class="font-bold text-green-700 block">${monthly.toLocaleString()} ج.م / شهر</span>
+                  <span class="text-[10px] text-red-600 block">المتبقي: ${rem.toLocaleString()} ج.م</span>
+                  ${rem > 0 ? `
+                    <button onclick="openPayModal('${o.OrderID}', '${cust.CustomerID}', '${o.ProductName}', ${o.MonthlyAmount})" class="bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold">
+                      تحصيل قسط
+                    </button>
+                  ` : '<span class="text-green-600 font-bold">مكتمل</span>'}
+                </div>
               </div>
-              <div class="text-left space-y-1">
-                <span class="font-bold text-green-700 block">${(o.MonthlyAmount || 0).toLocaleString()} ج.م / شهر</span>
-                <span class="text-[10px] text-red-600 block">المتبقي: ${(o.RemainingAmount || 0).toLocaleString()} ج.م</span>
-                ${parseFloat(o.RemainingAmount) > 0 ? `
-                  <button onclick="openPayModal('${o.OrderID}', '${cust.CustomerID}', '${o.ProductName}', ${o.MonthlyAmount})" class="bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold">
-                    تحصيل قسط
-                  </button>
-                ` : '<span class="text-green-600 font-bold">مكتمل</span>'}
-              </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       `;
     }
@@ -828,6 +848,7 @@
       try {
         await fetch(API_URL, {
           method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "payCustomerInstallment",
             orderId: document.getElementById("payModalOrderId").value,
@@ -848,20 +869,27 @@
       }
     }
 
+    // دالة الواتساب المصلحة والمعدلة برمز دولة مصر 20
     function shareCustomerWhatsApp(phone, name, amount) {
-      let p = phone.replace(/[^0-9]/g, '');
-      if (p.startsWith('0')) p = '2' + p;
-      const msg = `أهلاً بك أ/ ${name}، نود تذكيركم بأن إجمالي القسط الشهري المدمج المطلوب منك حالياً لدى غانم ستور هو (${amount.toLocaleString()} ج.م). شاكرين تعاملكم معنا.`;
+      let p = (phone || '').replace(/[^0-9]/g, '');
+      if (p.startsWith('0')) p = '20' + p.slice(1);
+      
+      if (!p.match(/^20\d{8,12}$/)) {
+        alert('رقم هاتف غير صالح للواتساب');
+        return;
+      }
+
+      const msg = `أهلاً بك أ/ ${name}، نود تذكيركم بأن إجمالي القسط الشهري المدمج المطلوب منك حالياً لدى غانم ستور هو (${(Number(amount) || 0).toLocaleString()} ج.م). شاكرين تعاملكم معنا.`;
       window.open(`https://wa.me/${p}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     function updateFinanceView() {
       let totalInst = 0, totalCash = 0, totalPending = 0;
       allOrders.forEach(o => {
-        totalInst += parseFloat(o.InstallmentPrice) || 0;
-        totalCash += parseFloat(o.DownPayment) || 0;
-        if (parseFloat(o.RemainingAmount) > 0) {
-          totalPending += parseFloat(o.RemainingAmount) || 0;
+        totalInst += Number(o.InstallmentPrice) || 0;
+        totalCash += Number(o.DownPayment) || 0;
+        if (Number(o.RemainingAmount) > 0) {
+          totalPending += Number(o.RemainingAmount) || 0;
         }
       });
 
@@ -869,7 +897,7 @@
       document.getElementById("finCollectedCash").innerText = totalCash.toLocaleString() + " ج.م";
       document.getElementById("finLateAmount").innerText = totalPending.toLocaleString() + " ج.م";
 
-      let totalSupDebt = allSuppliers.reduce((acc, s) => acc + (parseFloat(s.TotalDebt) || 0), 0);
+      let totalSupDebt = allSuppliers.reduce((acc, s) => acc + (Number(s.TotalDebt) || 0), 0);
       document.getElementById("finSuppliersDebt").innerText = totalSupDebt.toLocaleString() + " ج.م";
       document.getElementById("supTotalDebtHeader").innerText = totalSupDebt.toLocaleString() + " ج.م";
     }
@@ -879,26 +907,29 @@
       document.getElementById("lateModal").classList.add("flex");
 
       const tbody = document.getElementById("lateCustomersTable");
-      const activePending = allOrders.filter(o => parseFloat(o.RemainingAmount) > 0);
+      const activePending = allOrders.filter(o => Number(o.RemainingAmount) > 0);
 
       if (activePending.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-400">لا توجد أقساط معلقة حالياً</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = activePending.map(o => `
-        <tr class="border-b">
-          <td class="p-2 font-bold">${o.CustomerName}</td>
-          <td class="p-2 font-mono">${o.Phone}</td>
-          <td class="p-2 text-blue-900">${o.ProductName}</td>
-          <td class="p-2 font-bold text-red-600">${(o.RemainingAmount || 0).toLocaleString()} ج.م</td>
-          <td class="p-2 text-center">
-            <button onclick="shareCustomerWhatsApp('${o.Phone}', '${o.CustomerName}', ${o.MonthlyAmount})" class="bg-green-600 text-white px-2 py-1 rounded text-[10px]">
-              <i class="fa-brands fa-whatsapp"></i> واتساب
-            </button>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = activePending.map(o => {
+        const rem = Number(o.RemainingAmount) || 0;
+        return `
+          <tr class="border-b">
+            <td class="p-2 font-bold">${o.CustomerName}</td>
+            <td class="p-2 font-mono">${o.Phone}</td>
+            <td class="p-2 text-blue-900">${o.ProductName}</td>
+            <td class="p-2 font-bold text-red-600">${rem.toLocaleString()} ج.م</td>
+            <td class="p-2 text-center">
+              <button onclick="shareCustomerWhatsApp('${o.Phone}', '${o.CustomerName}', ${o.MonthlyAmount})" class="bg-green-600 text-white px-2 py-1 rounded text-[10px]">
+                <i class="fa-brands fa-whatsapp"></i> واتساب
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function closeLateModal() {
@@ -911,20 +942,23 @@
       document.getElementById("debtModal").classList.add("flex");
 
       const tbody = document.getElementById("debtSuppliersTable");
-      const activeDebts = allSuppliers.filter(s => parseFloat(s.TotalDebt) > 0);
+      const activeDebts = allSuppliers.filter(s => Number(s.TotalDebt) > 0);
 
       if (activeDebts.length === 0) {
         tbody.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-gray-400">لا توجد ديون تجار مسجلة</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = activeDebts.map(s => `
-        <tr class="border-b">
-          <td class="p-2 font-bold">${s.SupplierName}</td>
-          <td class="p-2 font-mono">${s.Phone || '-'}</td>
-          <td class="p-2 font-bold text-red-600">${(s.TotalDebt || 0).toLocaleString()} ج.م</td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = activeDebts.map(s => {
+        const debt = Number(s.TotalDebt) || 0;
+        return `
+          <tr class="border-b">
+            <td class="p-2 font-bold">${s.SupplierName}</td>
+            <td class="p-2 font-mono">${s.Phone || '-'}</td>
+            <td class="p-2 font-bold text-red-600">${debt.toLocaleString()} ج.م</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function closeDebtModal() {
