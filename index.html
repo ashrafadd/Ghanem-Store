@@ -440,19 +440,25 @@
     let currentUser = null;
     let allCustomers = [], allOrders = [], allSuppliers = [], allPurchases = [];
 
+    // تسجيل الدخول مع معالجة CORS
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("btnLogin");
       btn.disabled = true;
+      btn.innerText = "جاري التحقق...";
 
-      const email = document.getElementById("loginEmail").value;
-      const pass = document.getElementById("loginPassword").value;
+      const email = document.getElementById("loginEmail").value.trim();
+      const pass = document.getElementById("loginPassword").value.trim();
 
       try {
         const res = await fetch(API_URL, {
           method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
           body: JSON.stringify({ action: "login", email: email, password: pass })
         });
+        
         const data = await res.json();
 
         if (data.status === "success") {
@@ -470,12 +476,13 @@
           }
           loadAllData();
         } else {
-          alert(data.message);
+          alert(data.message || "بيانات الدخول غير صحيحة");
         }
       } catch (err) {
-        alert("حدث خطأ أثناء الاتصال بالسيرفر.");
+        alert("حدث خطأ أثناء الاتصال بالسيرفر، يرجى التأكد من نشر الأسكربت بإتاحة (Anyone).");
       } finally {
         btn.disabled = false;
+        btn.innerText = "تسجيل الدخول";
       }
     }
 
@@ -561,7 +568,6 @@
       document.getElementById("resMonthly").value = monthly.toLocaleString() + " ج.م / شهر";
     }
 
-    // Single Batch Save for Speed
     async function saveCustomerAndOrder(e) {
       e.preventDefault();
       const btn = document.getElementById("btnSaveOrder");
@@ -585,6 +591,7 @@
       try {
         await fetch(API_URL, {
           method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "saveOrderBatch",
             name: document.getElementById("cName").value,
@@ -623,6 +630,7 @@
       try {
         await fetch(API_URL, {
           method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "addPurchase",
             supplierName: document.getElementById("supName").value,
@@ -699,6 +707,7 @@
       try {
         await fetch(API_URL, {
           method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "paySupplier",
             supplierId: document.getElementById("selectedSupId").value,
@@ -715,7 +724,6 @@
       }
     }
 
-    // Filter Customers Search
     function filterCustomersList() {
       const query = document.getElementById("custSearchInput").value.toLowerCase();
       const filtered = allCustomers.filter(c => 
@@ -777,7 +785,6 @@
           </div>
         </div>
 
-        <!-- Combo Ribbon -->
         <div class="bg-blue-900 text-white p-4 rounded-xl shadow-md">
           <span class="text-xs text-blue-200 block">إجمالي القسط الشهري المدمج المطلوب حالياً:</span>
           <span class="text-2xl font-black text-yellow-400">${totalMonthlyCombo.toLocaleString()} ج.م / شهرياً</span>
@@ -829,6 +836,7 @@
       try {
         await fetch(API_URL, {
           method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "payCustomerInstallment",
             orderId: document.getElementById("payModalOrderId").value,
