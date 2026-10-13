@@ -440,7 +440,6 @@
     let currentUser = null;
     let allCustomers = [], allOrders = [], allSuppliers = [], allPurchases = [];
 
-    // تسجيل الدخول المباشر والتنفيذي
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("btnLogin");
@@ -451,7 +450,7 @@
       const email = encodeURIComponent(document.getElementById("loginEmail").value.trim());
       const pass = encodeURIComponent(document.getElementById("loginPassword").value.trim());
 
-      const loginUrl = `${API_URL}?action=login&email=${email}&password=${pass}`;
+      const loginUrl = API_URL + "?action=login&email=" + email + "&password=" + pass;
 
       try {
         const res = await fetch(loginUrl);
@@ -462,7 +461,7 @@
           currentUser = data;
           document.getElementById("loginScreen").classList.add("hidden");
           document.getElementById("appScreen").classList.remove("hidden");
-          document.getElementById("userInfo").innerText = `المستخدم: ${data.name}`;
+          document.getElementById("userInfo").innerText = "المستخدم: " + data.name;
 
           if (data.role === 'admin') {
             document.getElementById("nav-admin").classList.remove("hidden");
@@ -515,25 +514,25 @@
 
       try {
         const { data: { text } } = await Tesseract.recognize(file, 'ara', {
-          logger: m => { if (m.status === 'recognizing text') ocrText.innerText = `استخراج البيانات (${Math.round(m.progress * 100)}%)`; }
+          logger: m => { if (m.status === 'recognizing text') ocrText.innerText = "استخراج البيانات (" + Math.round(m.progress * 100) + "%)"; }
         });
 
         const arab = '٠١٢٣٤٥٦٧٨٩';
         const lat = '0123456789';
-        const westernText = text.replace(/[٠-٩]/g, ch => lat[arab.indexOf(ch)] || ch);
+        const westernText = text.replace(/[٠-٩]/g, function(ch) { return lat[arab.indexOf(ch)] || ch; });
         
         const idMatch = westernText.match(/\d{14}/);
         if (idMatch) {
           document.getElementById("cNationalID").value = idMatch[0];
         }
 
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
+        const lines = text.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 3; });
         if (lines.length > 0) {
           document.getElementById("cName").value = lines[0].replace(/[^\u0600-\u06FF\s]/g, '');
         }
 
         ocrText.innerText = "تم قراءة البطاقة بنجاح!";
-        setTimeout(() => ocrStatus.classList.add("hidden"), 3000);
+        setTimeout(function() { ocrStatus.classList.add("hidden"); }, 3000);
       } catch (err) {
         ocrText.innerText = "تعذر القراءة التلقائية، يرجى كتابة البيانات يدوياً.";
       }
@@ -654,23 +653,21 @@
     function renderSuppliersList(list) {
       const box = document.getElementById("suppliersList");
       if (!list || list.length === 0) {
-        box.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">لا يوجد تجار مسجلون حالياً</p>`;
+        box.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">لا يوجد تجار مسجلون حالياً</p>';
         return;
       }
 
-      box.innerHTML = list.map(s => {
+      box.innerHTML = list.map(function(s) {
         const debt = Number(s.TotalDebt) || 0;
-        return `
-          <div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center">
-            <div>
-              <h5 class="font-bold text-xs text-gray-800">${s.SupplierName}</h5>
-              <span class="text-[10px] text-gray-400 font-extrabold text-red-600">${debt.toLocaleString()} ج.م</span>
-            </div>
-            <button onclick="selectSupplier('${s.SupplierID}', '${s.SupplierName}')" class="bg-blue-900 text-white px-2 py-1 rounded text-[10px] font-bold">
-              تصفية / سداد
-            </button>
-          </div>
-        `;
+        return '<div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center">' +
+          '<div>' +
+            '<h5 class="font-bold text-xs text-gray-800">' + s.SupplierName + '</h5>' +
+            '<span class="text-[10px] text-gray-400 font-extrabold text-red-600">' + debt.toLocaleString() + ' ج.م</span>' +
+          '</div>' +
+          '<button onclick="selectSupplier(\'' + s.SupplierID + '\', \'' + s.SupplierName + '\')" class="bg-blue-900 text-white px-2 py-1 rounded text-[10px] font-bold">' +
+            'تصفية / سداد' +
+          '</button>' +
+        '</div>';
       }).join('');
     }
 
@@ -678,27 +675,26 @@
       document.getElementById("selectedSupId").value = id;
       document.getElementById("selectedSupName").value = name;
 
-      const filteredP = allPurchases.filter(p => p.SupplierName === name || p.SupplierID === id);
+      const filteredP = allPurchases.filter(function(p) { return p.SupplierName === name || p.SupplierID === id; });
       const tbody = document.getElementById("supplierLedgerBody");
 
       if (filteredP.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-400">لا توجد مشتريات لهذا التاجر</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="5" class="p-3 text-center text-gray-400">لا توجد مشتريات لهذا التاجر</td></tr>';
         return;
       }
 
-      tbody.innerHTML = filteredP.map(p => {
+      tbody.innerHTML = filteredP.map(function(p) {
         const total = Number(p.TotalPrice) || 0;
         const paid = Number(p.AmountPaid) || 0;
         const rem = Number(p.RemainingDebt) || 0;
-        return `
-          <tr class="border-b">
-            <td class="p-2 font-semibold">${p.ItemName}</td>
-            <td class="p-2">${total.toLocaleString()} ج.م</td>
-            <td class="p-2 text-green-600">${paid.toLocaleString()} ج.م</td>
-            <td class="p-2 text-red-600">${rem.toLocaleString()} ج.م</td>
-            <td class="p-2 text-[10px] text-gray-400">${(p.CreatedAt || '').split('T')[0]}</td>
-          </tr>
-        `;
+        const dateStr = (p.CreatedAt || '').split('T')[0];
+        return '<tr class="border-b">' +
+          '<td class="p-2 font-semibold">' + p.ItemName + '</td>' +
+          '<td class="p-2">' + total.toLocaleString() + ' ج.م</td>' +
+          '<td class="p-2 text-green-600">' + paid.toLocaleString() + ' ج.م</td>' +
+          '<td class="p-2 text-red-600">' + rem.toLocaleString() + ' ج.م</td>' +
+          '<td class="p-2 text-[10px] text-gray-400">' + dateStr + '</td>' +
+        '</tr>';
       }).join('');
     }
 
@@ -734,27 +730,28 @@
 
     function filterCustomersList() {
       const query = document.getElementById("custSearchInput").value.toLowerCase();
-      const filtered = allCustomers.filter(c => 
-        (c.Name || '').toLowerCase().includes(query) ||
-        (c.Phone || '').includes(query) ||
-        (c.Village || '').toLowerCase().includes(query)
-      );
+      const filtered = allCustomers.filter(function(c) { 
+        return (c.Name || '').toLowerCase().indexOf(query) !== -1 ||
+               (c.Phone || '').indexOf(query) !== -1 ||
+               (c.Village || '').toLowerCase().indexOf(query) !== -1;
+      });
       renderCustomersNavList(filtered);
     }
 
     function renderCustomersNavList(list) {
       const box = document.getElementById("customersListNav");
       if (!list || list.length === 0) {
-        box.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">لا يوجد عملاء مطابقون للبحث</p>`;
+        box.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">لا يوجد عملاء مطابقون للبحث</p>';
         return;
       }
 
-      box.innerHTML = list.map(c => `
-        <div onclick="selectCustomerDetail('${c.CustomerID}')" class="p-3 bg-white border rounded-xl hover:bg-blue-50 cursor-pointer transition">
-          <h5 class="font-bold text-xs text-gray-800">${c.Name}</h5>
-          <span class="text-[10px] text-gray-500 block">${c.Village || '-'} | ${c.Phone}</span>
-        </div>
-      `).join('');
+      box.innerHTML = list.map(function(c) {
+        const villageStr = c.Village || '-';
+        return '<div onclick="selectCustomerDetail(\'' + c.CustomerID + '\')" class="p-3 bg-white border rounded-xl hover:bg-blue-50 cursor-pointer transition">' +
+          '<h5 class="font-bold text-xs text-gray-800">' + c.Name + '</h5>' +
+          '<span class="text-[10px] text-gray-500 block">' + villageStr + ' | ' + c.Phone + '</span>' +
+        '</div>';
+      }).join('');
     }
 
     function loadCustomersSectionData() {
@@ -762,74 +759,83 @@
     }
 
     function selectCustomerDetail(id) {
-      const cust = allCustomers.find(c => c.CustomerID === id);
-      const orders = allOrders.filter(o => o.CustomerID === id);
+      const cust = allCustomers.find(function(c) { return c.CustomerID === id; });
+      const orders = allOrders.filter(function(o) { return o.CustomerID === id; });
       const view = document.getElementById("customerDetailView");
 
       if (!cust) return;
 
       let totalMonthlyCombo = 0;
       let activeOrdersCount = 0;
-      orders.forEach(o => {
+      orders.forEach(function(o) {
         if (parseFloat(o.RemainingAmount) > 0) {
           totalMonthlyCombo += parseFloat(o.MonthlyAmount) || 0;
           activeOrdersCount++;
         }
       });
 
-      view.innerHTML = `
-        <div class="border-b pb-3 flex justify-between items-center">
-          <div>
-            <h4 class="font-extrabold text-blue-900 text-md">${cust.Name}</h4>
-            <p class="text-xs text-gray-500">${cust.Village} | هاتف: ${cust.Phone} | بطاقة: ${cust.NationalID || 'غير مسجلة'}</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="shareCustomerWhatsApp('${cust.Phone}', '${cust.Name}', ${totalMonthlyCombo})" class="bg-green-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
-              <i class="fa-brands fa-whatsapp"></i> إرسال المدمج
-            </button>
-            <span class="px-3 py-1 rounded-full text-xs font-bold ${cust.Rating === 'متأخر' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
-              ${cust.Rating || 'منتظم'}
-            </span>
-          </div>
-        </div>
+      const ratingClass = cust.Rating === 'متأخر' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
+      const ratingText = cust.Rating || 'منتظم';
+      const natIdText = cust.NationalID || 'غير مسجلة';
 
-        <div class="bg-blue-900 text-white p-4 rounded-xl shadow-md">
-          <span class="text-xs text-blue-200 block">إجمالي القسط الشهري المدمج المطلوب حالياً:</span>
-          <span class="text-2xl font-black text-yellow-400">${totalMonthlyCombo.toLocaleString()} ج.م / شهرياً</span>
-          <p class="text-[11px] text-blue-100 mt-1">يمتلك العميل (${activeOrdersCount}) عقود أقساط نشطة حالياً.</p>
-        </div>
+      let html = '<div class="border-b pb-3 flex justify-between items-center">' +
+        '<div>' +
+          '<h4 class="font-extrabold text-blue-900 text-md">' + cust.Name + '</h4>' +
+          '<p class="text-xs text-gray-500">' + cust.Village + ' | هاتف: ' + cust.Phone + ' | بطاقة: ' + natIdText + '</p>' +
+        '</div>' +
+        '<div class="flex items-center gap-2">' +
+          '<button onclick="shareCustomerWhatsApp(\'' + cust.Phone + '\', \'' + cust.Name + '\', ' + totalMonthlyCombo + ')" class="bg-green-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">' +
+            '<i class="fa-brands fa-whatsapp"></i> إرسال المدمج' +
+          '</button>' +
+          '<span class="px-3 py-1 rounded-full text-xs font-bold ' + ratingClass + '">' + ratingText + '</span>' +
+        '</div>' +
+      '</div>' +
 
-        <h5 class="font-bold text-xs text-gray-700 mt-3">الأجهزة والعقود المسجلة:</h5>
-        <div class="space-y-2">
-          ${orders.map(o => {
-            const monthly = Number(o.MonthlyAmount) || 0;
-            const rem = Number(o.RemainingAmount) || 0;
-            return `
-              <div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center text-xs">
-                <div>
-                  <span class="font-bold text-blue-900 block">${o.ProductName \vert{}\vert{} 'جهاز غير معرف'} (${o.Category || 'عام'})</span>
-                  <span class="text-[10px] text-gray-500">بداية العقد: ${o.StartDate \vert{}\vert{} '-'} \vert{} المدة: ${o.MonthsCount || 0} أشهر</span>
-                </div>
-                <div class="text-left space-y-1">
-                  <span class="font-bold text-green-700 block">${monthly.toLocaleString()} ج.م / شهر</span>
-                  <span class="text-[10px] text-red-600 block">المتبقي: ${rem.toLocaleString()} ج.م</span>
-                  ${rem > 0 ? `
-                    <button onclick="openPayModal('${o.OrderID}', '${cust.CustomerID}', '${o.ProductName}', ${o.MonthlyAmount})" class="bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold">
-                      تحصيل قسط
-                    </button>
-                  ` : '<span class="text-green-600 font-bold">مكتمل</span>'}
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `;
+      '<div class="bg-blue-900 text-white p-4 rounded-xl shadow-md">' +
+        '<span class="text-xs text-blue-200 block">إجمالي القسط الشهري المدمج المطلوب حالياً:</span>' +
+        '<span class="text-2xl font-black text-yellow-400">' + totalMonthlyCombo.toLocaleString() + ' ج.م / شهرياً</span>' +
+        '<p class="text-[11px] text-blue-100 mt-1">يمتلك العميل (' + activeOrdersCount + ') عقود أقساط نشطة حالياً.</p>' +
+      '</div>' +
+
+      '<h5 class="font-bold text-xs text-gray-700 mt-3">الأجهزة والعقود المسجلة:</h5>' +
+      '<div class="space-y-2">';
+
+      html += orders.map(function(o) {
+        const monthly = Number(o.MonthlyAmount) || 0;
+        const rem = Number(o.RemainingAmount) || 0;
+        const prodName = o.ProductName || 'جهاز غير معرف';
+        const catName = o.Category || 'عام';
+        const startDateStr = o.StartDate || '-';
+        const monthsCnt = o.MonthsCount || 0;
+
+        let btnPayHtml = '';
+        if (rem > 0) {
+          btnPayHtml = '<button onclick="openPayModal(\'' + o.OrderID + '\', \'' + cust.CustomerID + '\', \'' + prodName + '\', ' + o.MonthlyAmount + ')" class="bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold">تحصيل قسط</button>';
+        } else {
+          btnPayHtml = '<span class="text-green-600 font-bold">مكتمل</span>';
+        }
+
+        return '<div class="p-3 bg-gray-50 border rounded-xl flex justify-between items-center text-xs">' +
+          '<div>' +
+            '<span class="font-bold text-blue-900 block">' + prodName + ' (' + catName + ')</span>' +
+            '<span class="text-[10px] text-gray-500">بداية العقد: ' + startDateStr + ' | المدة: ' + monthsCnt + ' أشهر</span>' +
+          '</div>' +
+          '<div class="text-left space-y-1">' +
+            '<span class="font-bold text-green-700 block">' + monthly.toLocaleString() + ' ج.م / شهر</span>' +
+            '<span class="text-[10px] text-red-600 block">المتبقي: ' + rem.toLocaleString() + ' ج.م</span>' +
+            btnPayHtml +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      html += '</div>';
+      view.innerHTML = html;
     }
 
     function openPayModal(orderId, custId, prodName, defaultAmt) {
       document.getElementById("payModalOrderId").value = orderId;
       document.getElementById("payModalCustId").value = custId;
-      document.getElementById("payModalTitle").innerText = `تحصيل قسط: ${prodName}`;
+      document.getElementById("payModalTitle").innerText = "تحصيل قسط: " + prodName;
       document.getElementById("payModalAmount").value = defaultAmt || 0;
       document.getElementById("payModal").classList.remove("hidden");
       document.getElementById("payModal").classList.add("flex");
@@ -869,23 +875,23 @@
       }
     }
 
-    // دالة الواتساب المصلحة والمعدلة برمز دولة مصر 20
     function shareCustomerWhatsApp(phone, name, amount) {
       let p = (phone || '').replace(/[^0-9]/g, '');
-      if (p.startsWith('0')) p = '20' + p.slice(1);
+      if (p.indexOf('0') === 0) p = '20' + p.slice(1);
       
       if (!p.match(/^20\d{8,12}$/)) {
         alert('رقم هاتف غير صالح للواتساب');
         return;
       }
 
-      const msg = `أهلاً بك أ/ ${name}، نود تذكيركم بأن إجمالي القسط الشهري المدمج المطلوب منك حالياً لدى غانم ستور هو (${(Number(amount) || 0).toLocaleString()} ج.م). شاكرين تعاملكم معنا.`;
-      window.open(`https://wa.me/${p}?text=${encodeURIComponent(msg)}`, '_blank');
+      const numAmt = Number(amount) || 0;
+      const msg = "أهلاً بك أ/ " + name + "، نود تذكيركم بأن إجمالي القسط الشهري المدمج المطلوب منك حالياً لدى غانم ستور هو (" + numAmt.toLocaleString() + " ج.م). شاكرين تعاملكم معنا.";
+      window.open("https://wa.me/" + p + "?text=" + encodeURIComponent(msg), '_blank');
     }
 
     function updateFinanceView() {
       let totalInst = 0, totalCash = 0, totalPending = 0;
-      allOrders.forEach(o => {
+      allOrders.forEach(function(o) {
         totalInst += Number(o.InstallmentPrice) || 0;
         totalCash += Number(o.DownPayment) || 0;
         if (Number(o.RemainingAmount) > 0) {
@@ -897,7 +903,7 @@
       document.getElementById("finCollectedCash").innerText = totalCash.toLocaleString() + " ج.م";
       document.getElementById("finLateAmount").innerText = totalPending.toLocaleString() + " ج.م";
 
-      let totalSupDebt = allSuppliers.reduce((acc, s) => acc + (Number(s.TotalDebt) || 0), 0);
+      let totalSupDebt = allSuppliers.reduce(function(acc, s) { return acc + (Number(s.TotalDebt) || 0); }, 0);
       document.getElementById("finSuppliersDebt").innerText = totalSupDebt.toLocaleString() + " ج.م";
       document.getElementById("supTotalDebtHeader").innerText = totalSupDebt.toLocaleString() + " ج.م";
     }
@@ -907,28 +913,26 @@
       document.getElementById("lateModal").classList.add("flex");
 
       const tbody = document.getElementById("lateCustomersTable");
-      const activePending = allOrders.filter(o => Number(o.RemainingAmount) > 0);
+      const activePending = allOrders.filter(function(o) { return Number(o.RemainingAmount) > 0; });
 
       if (activePending.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-400">لا توجد أقساط معلقة حالياً</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="5" class="p-3 text-center text-gray-400">لا توجد أقساط معلقة حالياً</td></tr>';
         return;
       }
 
-      tbody.innerHTML = activePending.map(o => {
+      tbody.innerHTML = activePending.map(function(o) {
         const rem = Number(o.RemainingAmount) || 0;
-        return `
-          <tr class="border-b">
-            <td class="p-2 font-bold">${o.CustomerName}</td>
-            <td class="p-2 font-mono">${o.Phone}</td>
-            <td class="p-2 text-blue-900">${o.ProductName}</td>
-            <td class="p-2 font-bold text-red-600">${rem.toLocaleString()} ج.م</td>
-            <td class="p-2 text-center">
-              <button onclick="shareCustomerWhatsApp('${o.Phone}', '${o.CustomerName}', ${o.MonthlyAmount})" class="bg-green-600 text-white px-2 py-1 rounded text-[10px]">
-                <i class="fa-brands fa-whatsapp"></i> واتساب
-              </button>
-            </td>
-          </tr>
-        `;
+        return '<tr class="border-b">' +
+          '<td class="p-2 font-bold">' + o.CustomerName + '</td>' +
+          '<td class="p-2 font-mono">' + o.Phone + '</td>' +
+          '<td class="p-2 text-blue-900">' + o.ProductName + '</td>' +
+          '<td class="p-2 font-bold text-red-600">' + rem.toLocaleString() + ' ج.م</td>' +
+          '<td class="p-2 text-center">' +
+            '<button onclick="shareCustomerWhatsApp(\'' + o.Phone + '\', \'' + o.CustomerName + '\', ' + o.MonthlyAmount + ')" class="bg-green-600 text-white px-2 py-1 rounded text-[10px]">' +
+              '<i class="fa-brands fa-whatsapp"></i> واتساب' +
+            '</button>' +
+          '</td>' +
+        '</tr>';
       }).join('');
     }
 
@@ -942,22 +946,21 @@
       document.getElementById("debtModal").classList.add("flex");
 
       const tbody = document.getElementById("debtSuppliersTable");
-      const activeDebts = allSuppliers.filter(s => Number(s.TotalDebt) > 0);
+      const activeDebts = allSuppliers.filter(function(s) { return Number(s.TotalDebt) > 0; });
 
       if (activeDebts.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-gray-400">لا توجد ديون تجار مسجلة</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="3" class="p-3 text-center text-gray-400">لا توجد ديون تجار مسجلة</td></tr>';
         return;
       }
 
-      tbody.innerHTML = activeDebts.map(s => {
+      tbody.innerHTML = activeDebts.map(function(s) {
         const debt = Number(s.TotalDebt) || 0;
-        return `
-          <tr class="border-b">
-            <td class="p-2 font-bold">${s.SupplierName}</td>
-            <td class="p-2 font-mono">${s.Phone || '-'}</td>
-            <td class="p-2 font-bold text-red-600">${debt.toLocaleString()} ج.م</td>
-          </tr>
-        `;
+        const phoneStr = s.Phone || '-';
+        return '<tr class="border-b">' +
+          '<td class="p-2 font-bold">' + s.SupplierName + '</td>' +
+          '<td class="p-2 font-mono">' + phoneStr + '</td>' +
+          '<td class="p-2 font-bold text-red-600">' + debt.toLocaleString() + ' ج.م</td>' +
+        '</tr>';
       }).join('');
     }
 
@@ -967,12 +970,16 @@
     }
 
     function showSection(sec) {
-      ['installments', 'customers', 'suppliers', 'finance', 'admin'].forEach(s => {
-        document.getElementById(`sec-${s}`)?.classList.add("hidden");
-        document.getElementById(`nav-${s}`)?.classList.remove("active-nav");
+      ['installments', 'customers', 'suppliers', 'finance', 'admin'].forEach(function(s) {
+        const el = document.getElementById('sec-' + s);
+        const nav = document.getElementById('nav-' + s);
+        if (el) el.classList.add("hidden");
+        if (nav) nav.classList.remove("active-nav");
       });
-      document.getElementById(`sec-${sec}`)?.classList.remove("hidden");
-      document.getElementById(`nav-${sec}`)?.classList.add("active-nav");
+      const targetEl = document.getElementById('sec-' + sec);
+      const targetNav = document.getElementById('nav-' + sec);
+      if (targetEl) targetEl.classList.remove("hidden");
+      if (targetNav) targetNav.classList.add("active-nav");
 
       if (sec === 'customers') loadCustomersSectionData();
     }
