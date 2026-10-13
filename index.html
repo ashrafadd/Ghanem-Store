@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Google Font: Cairo -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tesseract.js (Arabic OCR for Egyptian ID) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <style>
     body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
@@ -19,7 +21,7 @@
 </head>
 <body class="text-gray-800 antialiased">
 
-  <!-- ==================== 1. شاشة تسجيل الدخول ==================== -->
+  <!-- LOGIN SCREEN -->
   <div id="loginScreen" class="fixed inset-0 bg-blue-950 flex justify-center items-center p-4 z-50">
     <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full border border-gray-100 text-right">
       <div class="text-center mb-6">
@@ -45,7 +47,7 @@
     </div>
   </div>
 
-  <!-- ==================== 2. الواجهة الرئيسية للتطبيق ==================== -->
+  <!-- MAIN APP WRAPPER -->
   <div id="appScreen" class="hidden min-h-screen pb-12">
     <!-- Header -->
     <header class="bg-blue-900 text-white shadow-md sticky top-0 z-40">
@@ -70,7 +72,7 @@
           <i class="fa-solid fa-truck-field"></i> المشتريات والتجار
         </button>
         <button id="nav-finance" onclick="showSection('finance')" class="px-4 py-2.5 rounded-xl flex items-center gap-2 text-gray-600 transition">
-          <i class="fa-solid fa-chart-line"></i> الخزينة والأرباح (خاص بغانم)
+          <i class="fa-solid fa-chart-line"></i> الخزينة والأرباح
         </button>
         <button id="nav-admin" onclick="showSection('admin')" class="px-4 py-2.5 rounded-xl flex items-center gap-2 text-gray-600 transition hidden">
           <i class="fa-solid fa-user-shield"></i> لوحة الأدمن واسترجاع المحذوفات
@@ -78,12 +80,31 @@
       </div>
     </div>
 
-    <!-- MAIN SECTIONS CONTENT -->
+    <!-- MAIN CONTENT -->
     <main class="max-w-7xl mx-auto px-4 mt-6">
 
       <!-- SECTION 1: INSTALLMENTS & CUSTOMERS -->
       <section id="sec-installments" class="space-y-6">
-        <!-- New Order Form -->
+        
+        <!-- OCR ID Scanner Box -->
+        <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-2xl p-5 shadow-md flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h4 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-id-card text-yellow-400"></i> القارئ الذكي لبطاقة الرقم القومي المصرية (OCR)</h4>
+            <p class="text-xs text-blue-200 mt-1">التقط صورة البطاقة بالكاميرا لاستخراج الاسم والرقم القومي تلقائياً</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="file" id="idCardCamera" accept="image/*" capture="environment" onchange="processIDCard(event)" class="hidden">
+            <button onclick="document.getElementById('idCardCamera').click()" class="bg-yellow-500 hover:bg-yellow-400 text-blue-950 px-4 py-2 rounded-xl font-bold text-sm shadow flex items-center gap-2">
+              <i class="fa-solid fa-camera"></i> تصوير / رفع البطاقة
+            </button>
+          </div>
+        </div>
+
+        <div id="ocrStatus" class="hidden bg-blue-50 text-blue-800 p-3 rounded-xl text-xs font-bold border border-blue-200 flex items-center gap-2">
+          <i class="fa-solid fa-spinner fa-spin"></i> <span id="ocrText">جاري قراءة بيانات البطاقة...</span>
+        </div>
+
+        <!-- Form Order -->
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
           <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
             <i class="fa-solid fa-cart-plus text-yellow-500"></i>
@@ -97,12 +118,12 @@
                 <input type="text" id="cName" required placeholder="مثال: محمد أحمد علي" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600">
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-600 mb-1">رقم الهاتف *</label>
-                <input type="tel" id="cPhone" required placeholder="010xxxxxxx" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600">
+                <label class="block text-xs font-bold text-gray-600 mb-1">الرقم القومي (14 رقم)</label>
+                <input type="text" id="cNationalID" maxlength="14" placeholder="290xxxxxxxxxxx" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm outline-none">
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-600 mb-1">رقم الواتساب *</label>
-                <input type="tel" id="cWhatsapp" required placeholder="010xxxxxxx" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600">
+                <label class="block text-xs font-bold text-gray-600 mb-1">رقم الهاتف والواتساب *</label>
+                <input type="tel" id="cPhone" required placeholder="010xxxxxxx" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600">
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">القرية / العنوان بديروط *</label>
@@ -110,15 +131,19 @@
               </div>
             </div>
 
-            <!-- Product Dropdown & Pricing -->
+            <!-- Categories -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-blue-50/60 p-4 rounded-xl border border-blue-100">
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">تصنيف الجهاز</label>
-                <select id="pCategory" class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-sm outline-none">
-                  <option value="هواتف ذكية">هواتف ذكية</option>
+                <select id="pCategory" onchange="checkCustomCategory(this)" class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-sm outline-none">
+                  <option value="هواتف ذكية">هواتف ذكية ومستلزماتها</option>
                   <option value="أجهزة منزلية">أجهزة منزلية كهربائية</option>
+                  <option value="شاشات وتلفزيونات">شاشات وتلفزيونات</option>
                   <option value="أجهزة تكييف">أجهزة تكييف وتبريد</option>
+                  <option value="إلكترونيات وملحقات">إلكترونيات وساعات ذكية</option>
+                  <option value="custom">+ إضافة تصنيف جديد...</option>
                 </select>
+                <input type="text" id="customCategoryInput" placeholder="اكتب التصنيف الجديد" class="hidden w-full mt-2 bg-white border border-gray-300 rounded-xl p-2 text-xs">
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">اسم الجهاز / الموديل *</label>
@@ -158,11 +183,6 @@
               </div>
             </div>
 
-            <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">رابط صورة البطاقة الشخصية للعميل (اختياري)</label>
-              <input type="url" id="cCardUrl" placeholder="https://..." class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm outline-none">
-            </div>
-
             <button type="submit" id="btnSaveOrder" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-md transition flex justify-center items-center gap-2">
               <i class="fa-solid fa-check-circle"></i>
               <span>اعتماد العملية وحفظها في قاعدة البيانات</span>
@@ -171,12 +191,14 @@
         </div>
       </section>
 
-      <!-- SECTION 2: SUPPLIERS & PURCHASES -->
+      <!-- SECTION 2: SUPPLIERS & PURCHASES (COMPLETE) -->
       <section id="sec-suppliers" class="hidden space-y-6">
+        
+        <!-- Add Purchase -->
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
           <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
             <i class="fa-solid fa-boxes-packing text-blue-600"></i>
-            تسجيل مشتريات الأجهزة من كبار التجار
+            تسجيل فاتورة شراء أجهزة من كبار التجار
           </h3>
           <form onsubmit="savePurchase(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -192,7 +214,7 @@
               <input type="text" id="purSerial" placeholder="مثال: 3569821045" class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded-xl text-sm outline-none">
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-600 mb-1">السعر الإجمالي (ج.م) *</label>
+              <label class="block text-xs font-bold text-gray-600 mb-1">السعر الإجمالي للفاتورة (ج.م) *</label>
               <input type="number" id="purTotal" placeholder="50000" required class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded-xl text-sm outline-none">
             </div>
             <div>
@@ -201,21 +223,100 @@
             </div>
             <div class="flex items-end">
               <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-2.5 rounded-xl transition shadow">
-                حفظ الشراء وخصم من حساب التاجر
+                حفظ الشراء وتخصيم الحساب
               </button>
             </div>
           </form>
         </div>
+
+        <!-- Suppliers List & Ledger -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <!-- Suppliers Cards -->
+          <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm md:col-span-1 space-y-4">
+            <h4 class="font-bold text-blue-900 text-md flex items-center justify-between">
+              <span><i class="fa-solid fa-users-between-lines ml-1"></i> قائمة التجار المضافين</span>
+              <button onclick="loadSuppliersData()" class="text-xs bg-gray-100 p-1.5 rounded-lg text-blue-700"><i class="fa-solid fa-rotate"></i></button>
+            </h4>
+            <div id="suppliersList" class="space-y-2 max-h-80 overflow-y-auto">
+              <p class="text-xs text-gray-400 text-center py-4">جاري تحميل قائمة التجار...</p>
+            </div>
+          </div>
+
+          <!-- Settle & Statement Box -->
+          <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm md:col-span-2 space-y-4">
+            <h4 class="font-bold text-blue-900 text-md flex items-center gap-2">
+              <i class="fa-solid fa-receipt text-green-600"></i>
+              تصفية حساب تاجر وسداد دفعة جديدة
+            </h4>
+
+            <form onsubmit="paySupplierDebt(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-green-50/50 p-4 rounded-xl border border-green-100">
+              <input type="hidden" id="selectedSupId">
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">التاجر المحدد</label>
+                <input type="text" id="selectedSupName" readonly placeholder="اختر تاجر من القائمة" class="w-full bg-gray-100 border p-2 rounded-xl text-xs font-bold">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">مبلغ الدفعة المسددة (ج.م)</label>
+                <input type="number" id="supPayAmount" required placeholder="5000" class="w-full bg-white border p-2 rounded-xl text-xs outline-none">
+              </div>
+              <div class="flex items-end">
+                <button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold p-2 rounded-xl text-xs transition">
+                  خصم الدفعة وتصفية الحساب
+                </button>
+              </div>
+            </form>
+
+            <h5 class="font-bold text-xs text-gray-600 mt-2">كشف المشتريات والدفعات السابقة للتاجر:</h5>
+            <div class="overflow-x-auto max-h-60 overflow-y-auto">
+              <table class="w-full text-right text-xs">
+                <thead class="bg-gray-100 text-gray-700 font-bold">
+                  <tr>
+                    <th class="p-2">الصنف</th>
+                    <th class="p-2">الإجمالي</th>
+                    <th class="p-2">المدفوع</th>
+                    <th class="p-2">المتبقي</th>
+                    <th class="p-2">التاريخ</th>
+                  </tr>
+                </thead>
+                <tbody id="supplierLedgerBody">
+                  <tr><td colspan="5" class="p-3 text-center text-gray-400">اختر تاجرًا لمعاينة كشف حسابه بالكامل</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
       </section>
 
-      <!-- SECTION 3: FINANCE (GHANEM ONLY) -->
+      <!-- SECTION 3: TREASURY & PROFITS (FULL) -->
       <section id="sec-finance" class="hidden space-y-6">
-        <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-2xl p-6 shadow-lg">
+        <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-950 text-white rounded-2xl p-6 shadow-lg">
           <h3 class="text-xl font-bold flex items-center gap-2">
             <i class="fa-solid fa-coins text-yellow-400"></i>
-            تقرير الخزينة والسيولة النقدية والأرباح (خاص بغانم)
+            تقرير الخزينة والسيولة النقدية والأرباح
           </h3>
-          <p class="text-xs text-blue-200 mt-1">هذه البيانات مشفرة ولا تظهر إلا بحساب أ/ غانم فقط ولا يمكن للأدمن الاطلاع عليها.</p>
+          <p class="text-xs text-blue-200 mt-1">متابعة شاملة لحجم المبيعات والأرباح ورأس المال بديروط</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center">
+            <span class="text-xs text-gray-500 font-bold block">إجمالي مبيعات التقسيط</span>
+            <span id="finTotalInstallments" class="text-xl font-black text-blue-900 mt-1 block">0 ج.م</span>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center">
+            <span class="text-xs text-gray-500 font-bold block">المستحق والمحصل كاش</span>
+            <span id="finCollectedCash" class="text-xl font-black text-green-600 mt-1 block">0 ج.م</span>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center">
+            <span class="text-xs text-gray-500 font-bold block">رأس المال المعلق بالسوق (العملاء)</span>
+            <span id="finMarketPending" class="text-xl font-black text-yellow-600 mt-1 block">0 ج.م</span>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-center">
+            <span class="text-xs text-gray-500 font-bold block">ديون التجار المستحقة</span>
+            <span id="finSuppliersDebt" class="text-xl font-black text-red-600 mt-1 block">0 ج.م</span>
+          </div>
         </div>
       </section>
 
@@ -234,16 +335,16 @@
   </div>
 
   <script>
-    // رابط API الجديد الخاص بك
     const API_URL = "https://script.google.com/macros/s/AKfycbzXQcRID27rFL18HRj4v7_n-L_JURBrKGzIHC_Tnq0mpJa0TlwykeBbc3d9tBHmXCg/exec";
     let currentUser = null;
+    let allSuppliers = [];
+    let allPurchases = [];
 
     // تسجيل الدخول
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("btnLogin");
       btn.disabled = true;
-      btn.innerText = "جاري التحقق...";
 
       const email = document.getElementById("loginEmail").value;
       const pass = document.getElementById("loginPassword").value;
@@ -261,26 +362,69 @@
           document.getElementById("appScreen").classList.remove("hidden");
           document.getElementById("userInfo").innerText = `المستخدم: ${data.name}`;
 
-          // تطبيق الصلاحيات الدقيقة
           if (data.role === 'admin') {
             document.getElementById("nav-admin").classList.remove("hidden");
-            document.getElementById("nav-finance").classList.add("hidden"); // حجب الخزينة والأرباح عن الأدمن
+            document.getElementById("nav-finance").classList.add("hidden");
           } else {
             document.getElementById("nav-finance").classList.remove("hidden");
             document.getElementById("nav-admin").classList.add("hidden");
           }
+          loadSuppliersData();
+          loadFinanceData();
         } else {
           alert(data.message);
         }
       } catch (err) {
-        alert("حدث خطأ أثناء الاتصال بالسيرفر، يرجى إعادة المحاولة.");
+        alert("حدث خطأ أثناء الاتصال بالسيرفر.");
       } finally {
         btn.disabled = false;
-        btn.innerText = "تسجيل الدخول";
       }
     }
 
-    // حساب حاسبة التقسيط الشرعية
+    // OCR scanning for Egyptian ID Card
+    async function processIDCard(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const ocrStatus = document.getElementById("ocrStatus");
+      const ocrText = document.getElementById("ocrText");
+      ocrStatus.classList.remove("hidden");
+      ocrText.innerText = "جاري قراءة وتحليل بيانات البطاقة المصرية...";
+
+      try {
+        const { data: { text } } = await Tesseract.recognize(file, 'ara', {
+          logger: m => { if (m.status === 'recognizing text') ocrText.innerText = `جاري استخراج البيانات (${Math.round(m.progress * 100)}%)`; }
+        });
+
+        // استخراج الرقم القومي (14 رقم متصل)
+        const idMatch = text.match(/\d{14}/);
+        if (idMatch) {
+          document.getElementById("cNationalID").value = idMatch[0];
+        }
+
+        // تنظيف وحفظ الاسم التقريبي
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 3);
+        if (lines.length > 0) {
+          document.getElementById("cName").value = lines[0].replace(/[^\u0600-\u06FF\s]/g, '');
+        }
+
+        ocrText.innerText = "تم استخراج البيانات بنجاح!";
+        setTimeout(() => ocrStatus.classList.add("hidden"), 3000);
+      } catch (err) {
+        ocrText.innerText = "تعذر قراءة الصورة وضوح تام، يرجى كتابة البيانات يدوياً.";
+      }
+    }
+
+    function checkCustomCategory(select) {
+      const input = document.getElementById("customCategoryInput");
+      if (select.value === "custom") {
+        input.classList.remove("hidden");
+        input.focus();
+      } else {
+        input.classList.add("hidden");
+      }
+    }
+
     function calcIslamicPrice() {
       const cash = parseFloat(document.getElementById("pCash").value) || 0;
       const down = parseFloat(document.getElementById("pDown").value) || 0;
@@ -299,12 +443,10 @@
       document.getElementById("resMonthly").value = monthly.toLocaleString() + " ج.م / شهر";
     }
 
-    // حفظ عملية تقسيط وعميل جديد
     async function saveCustomerAndOrder(e) {
       e.preventDefault();
       const btn = document.getElementById("btnSaveOrder");
       btn.disabled = true;
-      btn.innerText = "جاري الحفظ...";
 
       const cash = parseFloat(document.getElementById("pCash").value) || 0;
       const down = parseFloat(document.getElementById("pDown").value) || 0;
@@ -317,23 +459,24 @@
       const remaining = Math.max(0, totalInstallment - down);
       const monthly = Math.round(remaining / months);
 
+      let cat = document.getElementById("pCategory").value;
+      if (cat === "custom") cat = document.getElementById("customCategoryInput").value || "أخرى";
+
       try {
-        // 1. حفظ العميل
         const resCust = await fetch(API_URL, {
           method: "POST",
           body: JSON.stringify({
             action: "addCustomer",
             name: document.getElementById("cName").value,
             phone: document.getElementById("cPhone").value,
-            whatsapp: document.getElementById("cWhatsapp").value,
+            whatsapp: document.getElementById("cPhone").value,
             village: document.getElementById("cVillage").value,
             address: document.getElementById("cVillage").value,
-            idCardUrl: document.getElementById("cCardUrl").value
+            nationalId: document.getElementById("cNationalID").value
           })
         });
         const custData = await resCust.json();
 
-        // 2. حفظ الطلب
         await fetch(API_URL, {
           method: "POST",
           body: JSON.stringify({
@@ -341,7 +484,7 @@
             customerId: custData.customerId || "CUST-NEW",
             customerName: document.getElementById("cName").value,
             phone: document.getElementById("cPhone").value,
-            category: document.getElementById("pCategory").value,
+            category: cat,
             productName: document.getElementById("pName").value,
             cashPrice: cash,
             installmentPrice: totalInstallment,
@@ -363,7 +506,141 @@
       }
     }
 
-    // التنقل بين الشاشات
+    // Suppliers & Purchases Logic
+    async function savePurchase(e) {
+      e.preventDefault();
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "addPurchase",
+            supplierName: document.getElementById("supName").value,
+            itemName: document.getElementById("purItem").value,
+            serialNo: document.getElementById("purSerial").value,
+            totalPrice: parseFloat(document.getElementById("purTotal").value) || 0,
+            amountPaid: parseFloat(document.getElementById("purPaid").value) || 0
+          })
+        });
+        alert("تم تسجيل عملية الشراء وتحديث حساب التاجر!");
+        loadSuppliersData();
+      } catch (err) {
+        alert("خطأ أثناء تسجيل الشراء.");
+      }
+    }
+
+    async function loadSuppliersData() {
+      try {
+        const resS = await fetch(API_URL + "?action=getSuppliers");
+        allSuppliers = await resS.json();
+
+        const resP = await fetch(API_URL + "?action=getPurchases");
+        allPurchases = await resP.json();
+
+        renderSuppliersList(allSuppliers);
+      } catch (e) {
+        console.error("Error loading suppliers:", e);
+      }
+    }
+
+    function renderSuppliersList(list) {
+      const box = document.getElementById("suppliersList");
+      if (!list || list.length === 0) {
+        box.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">لا يوجد تجار مسجلون حالياً</p>`;
+        return;
+      }
+
+      box.innerHTML = list.map(s => `
+        <div onclick="selectSupplier('${s.SupplierID}', '${s.SupplierName}')" class="p-3 bg-gray-50 border rounded-xl hover:bg-blue-50 cursor-pointer transition flex justify-between items-center">
+          <div>
+            <h5 class="font-bold text-xs text-gray-800">${s.SupplierName}</h5>
+            <span class="text-[10px] text-gray-500">${s.Phone || '-'}</span>
+          </div>
+          <div class="text-left">
+            <span class="text-[10px] text-gray-400 block">المديونية</span>
+            <span class="font-extrabold text-xs text-red-600">${(s.TotalDebt || 0).toLocaleString()} ج.م</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectSupplier(id, name) {
+      document.getElementById("selectedSupId").value = id;
+      document.getElementById("selectedSupName").value = name;
+
+      // Filter purchases
+      const filteredP = allPurchases.filter(p => p.SupplierName === name || p.SupplierID === id);
+      const tbody = document.getElementById("supplierLedgerBody");
+
+      if (filteredP.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-400">لا توجد مشتريات مسجلة لهذا التاجر</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filteredP.map(p => `
+        <tr class="border-b">
+          <td class="p-2 font-semibold">${p.ItemName}</td>
+          <td class="p-2">${(p.TotalPrice || 0).toLocaleString()} ج.م</td>
+          <td class="p-2 text-green-600">${(p.AmountPaid || 0).toLocaleString()} ج.م</td>
+          <td class="p-2 text-red-600">${(p.RemainingDebt || 0).toLocaleString()} ج.م</td>
+          <td class="p-2 text-[10px] text-gray-400">${(p.CreatedAt || '').split('T')[0]}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function paySupplierDebt(e) {
+      e.preventDefault();
+      const supName = document.getElementById("selectedSupName").value;
+      const amount = parseFloat(document.getElementById("supPayAmount").value) || 0;
+
+      if (!supName || amount <= 0) {
+        alert("يرجى اختيار تاجر وإدخال مبلغ صحيح.");
+        return;
+      }
+
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "paySupplier",
+            supplierId: document.getElementById("selectedSupId").value,
+            supplierName: supName,
+            amountPaid: amount
+          })
+        });
+        alert("تم خصم السداد بنجاح وتحديث حساب التاجر!");
+        loadSuppliersData();
+      } catch (err) {
+        alert("حدث خطأ أثناء خصم السداد.");
+      }
+    }
+
+    async function loadFinanceData() {
+      try {
+        const resO = await fetch(API_URL + "?action=getOrders");
+        const orders = await resO.json();
+
+        let totalInst = 0;
+        let totalCash = 0;
+        let totalPending = 0;
+
+        orders.forEach(o => {
+          totalInst += parseFloat(o.InstallmentPrice) || 0;
+          totalCash += parseFloat(o.DownPayment) || 0;
+          totalPending += parseFloat(o.RemainingAmount) || 0;
+        });
+
+        document.getElementById("finTotalInstallments").innerText = totalInst.toLocaleString() + " ج.م";
+        document.getElementById("finCollectedCash").innerText = totalCash.toLocaleString() + " ج.م";
+        document.getElementById("finMarketPending").innerText = totalPending.toLocaleString() + " ج.م";
+
+        let totalSupDebt = allSuppliers.reduce((acc, s) => acc + (parseFloat(s.TotalDebt) || 0), 0);
+        document.getElementById("finSuppliersDebt").innerText = totalSupDebt.toLocaleString() + " ج.م";
+
+      } catch (e) {
+        console.error("Error finance:", e);
+      }
+    }
+
     function showSection(sec) {
       ['installments', 'suppliers', 'finance', 'admin'].forEach(s => {
         document.getElementById(`sec-${s}`)?.classList.add("hidden");
