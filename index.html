@@ -440,25 +440,20 @@
     let currentUser = null;
     let allCustomers = [], allOrders = [], allSuppliers = [], allPurchases = [];
 
-    // تسجيل الدخول مع معالجة CORS
+    // تسجيل الدخول المباشر والتنفيذي
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("btnLogin");
       btn.disabled = true;
       btn.innerText = "جاري التحقق...";
 
-      const email = document.getElementById("loginEmail").value.trim();
-      const pass = document.getElementById("loginPassword").value.trim();
+      const email = encodeURIComponent(document.getElementById("loginEmail").value.trim());
+      const pass = encodeURIComponent(document.getElementById("loginPassword").value.trim());
+
+      const loginUrl = `${API_URL}?action=login&email=${email}&password=${pass}`;
 
       try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-          },
-          body: JSON.stringify({ action: "login", email: email, password: pass })
-        });
-        
+        const res = await fetch(loginUrl);
         const data = await res.json();
 
         if (data.status === "success") {
@@ -479,7 +474,7 @@
           alert(data.message || "بيانات الدخول غير صحيحة");
         }
       } catch (err) {
-        alert("حدث خطأ أثناء الاتصال بالسيرفر، يرجى التأكد من نشر الأسكربت بإتاحة (Anyone).");
+        alert("حدث خطأ أثناء الاتصال. يرجى التأكد من اختيار (New Version) ثم (Deploy) وضبط الإتاحة على (Anyone) في Apps Script.");
       } finally {
         btn.disabled = false;
         btn.innerText = "تسجيل الدخول";
@@ -591,7 +586,6 @@
       try {
         await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "saveOrderBatch",
             name: document.getElementById("cName").value,
@@ -630,7 +624,6 @@
       try {
         await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "addPurchase",
             supplierName: document.getElementById("supName").value,
@@ -707,7 +700,6 @@
       try {
         await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "paySupplier",
             supplierId: document.getElementById("selectedSupId").value,
@@ -836,7 +828,6 @@
       try {
         await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "payCustomerInstallment",
             orderId: document.getElementById("payModalOrderId").value,
