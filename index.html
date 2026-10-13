@@ -440,7 +440,7 @@
     let currentUser = null;
     let allCustomers = [], allOrders = [], allSuppliers = [], allPurchases = [];
 
-    // تسجيل الدخول المباشر والتنفيذي
+    // تسجيل الدخول المباشر المضمون
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("btnLogin");
@@ -474,7 +474,7 @@
           alert(data.message || "بيانات الدخول غير صحيحة");
         }
       } catch (err) {
-        alert("حدث خطأ أثناء الاتصال. يرجى التأكد من اختيار (New Version) ثم (Deploy) وضبط الإتاحة على (Anyone) في Apps Script.");
+        alert("حدث خطأ أثناء الاتصال. يرجى التأكد من اختيار New Version في Apps Script.");
       } finally {
         btn.disabled = false;
         btn.innerText = "تسجيل الدخول";
